@@ -21,10 +21,6 @@ It also contains a REST API that can be use instead of the Dashboard, as well as
 
 The Master also manages the ``StatefulSet`` of worker through the Kubernetes API.
 
-.. include:: dashboard.rst
-
-.. include:: api.rst
-
 Worker
 ----------
 The worker image contains all the boilerplate code needed for a distributed ML model and

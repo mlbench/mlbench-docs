@@ -65,7 +65,7 @@ copyright = '2018 MLBench development team'
 
 intersphinx_mapping = {
     'mlbench-helm': ('http://mlbench.readthedocs.io/projects/mlbench-helm/en/%s/' % rtd_version, None),
-    #'dashboard': ('http://mlbench.readthedocs.io/projects/mlbench-dashboard/en/%s/' % rtd_version, None),
+    'dashboard': ('http://mlbench.readthedocs.io/projects/mlbench-dashboard/en/%s/' % rtd_version, None),
     #'benchmarks': ('http://mlbench.readthedocs.io/projects/mlbench-benchmarks/en/%s/' % rtd_version, None),
     #'core': ('http://mlbench.readthedocs.io/projects/mlbench-core/en/%s/' % rtd_version, None),
 }

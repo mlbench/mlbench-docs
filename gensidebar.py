@@ -75,10 +75,10 @@ def generate_sidebar(conf, conf_api):
     endl()
 
     toctree('Components')
-    write_ref('mlbench-helm', 'Helm Chart')
-    write_ref('mlbench-dashboard', 'Dashboard')
+    write_ref('mlbench_helm', 'Helm Chart')
+    write_ref('mlbench_dashboard', 'Dashboard')
     #write_ref('benchmarks', 'Benchmarks')
-    #write_api('core', 'Core')
+    write_api('mlbench_core', 'Core')
     endl()
 
     toctree('Additional Info')

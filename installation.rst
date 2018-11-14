@@ -5,7 +5,7 @@ Installation
 
 Make sure to read :doc:`prerequisites` before installing mlbench.
 
-All guides assume you have checked out the mlbench github repository and have a terminal open in the checked-out ``mlbench`` directory.
+All guides assume you have checked out the `mlbench-helm <https://github.com/mlbench/mlbench-helm>`__ github repository and have a terminal open in the checked-out ``mlbench-helm`` directory.
 
 .. _helm-charts:
 
@@ -13,7 +13,7 @@ Helm Chart values
 -----------------
 
 Since every Kubernetes is different, there are no reasonable defaults for some values, so the following properties have to be set.
-You can save them in a yaml file of your chosing. This guide will assume you saved them in `myvalues.yaml`. For a reference file for all configurable values, you can copy the `charts/mlbench/values.yaml` file to `myvalues.yaml`.
+You can save them in a yaml file of your chosing. This guide will assume you saved them in `myvalues.yaml`. For a reference file for all configurable values, you can copy the `values.yaml` file to `myvalues.yaml`.
 
 .. code-block:: yaml
 
@@ -56,14 +56,14 @@ Use helm to install the mlbench chart (Replace ``${RELEASE_NAME}`` with a name o
 
 .. code-block:: bash
 
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install ${RELEASE_NAME} charts/mlbench
+   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install ${RELEASE_NAME} .
 
 Follow the instructions at the end of the helm install to get the dashboard URL. E.g.:
 
 .. code-block:: bash
    :emphasize-lines: 5,6,7
 
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install rel charts/mlbench
+   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install rel .
      [...]
      NOTES:
      1. Get the application URL by running these commands:
@@ -100,7 +100,7 @@ Install mlbench (Replace ``${RELEASE_NAME}`` with a name of your choice):
 
 .. code-block:: bash
 
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install ${RELEASE_NAME} charts/mlbench
+   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install ${RELEASE_NAME} .
 
 To access mlbench, run these commands and open the URL that is returned (**Note**: The default instructions returned by `helm` on the commandline return the internal cluster ip only):
 
@@ -118,41 +118,6 @@ To access mlbench, run these commands and open the URL that is returned (**Note*
 
       $ gcloud compute firewall-rules delete --quiet mlbench
 
-.. hint::
-   If you want to build the docker images yourself and host it in the GC registry, follow these steps:
-
-   Authenticate with GC registry:
-
-   .. code-block:: bash
-
-      $ gcloud auth configure-docker
-
-   Build docker images (Replace **<gcloud project name>** with the name of your project):
-
-   .. code-block:: bash
-
-      $ make publish-docker component=master docker_registry=gcr.io/<gcloud project name>
-      $ make publish-docker component=worker docker_registry=gcr.io/<gcloud project name>
-
-   Use the following settings for your `myvalues.yaml` file when installing with helm:
-
-   .. code-block:: yaml
-
-      master:
-
-        image:
-          repository: gcr.io/<gcloud project name>/mlbench_master
-          tag: latest
-          pullPolicy: Always
-
-
-      worker:
-
-        image:
-          repository: gcr.io/<gcloud project name>/mlbench_worker
-          tag: latest
-          pullPolicy: Always
-
 
 Minikube
 --------
@@ -163,35 +128,19 @@ Installing mlbench to `minikube <https://github.com/kubernetes/minikube>`_.
 
 Set the :ref:`helm-charts`
 
-First build docker images and push them to private registry `localhost:5000`.
-
-.. code-block:: bash
-
-  $ make publish-docker component=master docker_registry=localhost:5000
-  $ make publish-docker component=worker docker_registry=localhost:5000
-
-Then start minikube cluster
+Start minikube cluster
 
 .. code-block:: bash
 
     $ minikube start
 
-Use `tcp-proxy <https://github.com/Tecnativa/docker-tcp-proxy>`_ to forward node's 5000 port to host's port 5000
-so that one can pull images from local registry.
-
-.. code-block:: bash
-
-    $ minikube ssh
-    $ docker run --name registry-proxy -d -e LISTEN=':5000' -e TALK="$(/sbin/ip route|awk '/default/ { print $3 }'):5000" -p 5000:5000 tecnativa/tcp-proxy
-
-Now we can pull images from private registry inside the cluster, check :code:`docker pull localhost:5000/mlbench_master:latest`.
 
 Next install or upgrade a helm chart with desired configurations with name `${RELEASE_NAME}`
 
 .. code-block:: bash
 
     $ helm init --kube-context minikube --wait
-    $ helm upgrade --wait --recreate-pods -f myvalues.yaml --timeout 900 --install ${RELEASE_NAME} charts/mlbench
+    $ helm upgrade --wait --recreate-pods -f myvalues.yaml --timeout 900 --install ${RELEASE_NAME} .
 
 .. note::
     The minikube runs a single-node Kubernetes cluster inside a VM. So we need to fix the :code:`replicaCount=1` in `values.yaml`.
@@ -263,14 +212,7 @@ This might take a couple of minutes.
 Install ``helm`` (See :doc:`prerequisites`) and set the :ref:`helm-charts`.
 
 .. hint::
-   For a local registry, build and push the ``master`` and ``worker`` images:
-
-   .. code-block:: bash
-
-      $ make publish-docker component=master docker_registry=localhost:5000
-      $ make publish-docker component=worker docker_registry=localhost:5000
-
-   Also, make sure you have an ``imagePullSecret`` added to the kubernetes serviceaccount and set the repository and secret in the ``values.yaml`` file (``regcred`` in this example):
+   For a local registry, make sure you have an ``imagePullSecret`` added to the kubernetes serviceaccount and set the repository and secret in the ``values.yaml`` file (``regcred`` in this example):
 
    .. code-block:: yaml
 
@@ -296,7 +238,7 @@ Install mlbench (Replace ``${RELEASE_NAME}`` with a name of your choice):
 .. code-block:: bash
    :emphasize-lines: 5,6,7
 
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install rel charts/mlbench
+   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install rel .
      [...]
      NOTES:
      1. Get the application URL by running these commands:

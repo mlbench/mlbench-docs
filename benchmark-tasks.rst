@@ -106,7 +106,7 @@ Image classification is one of the most important problems in computer vision an
 
       + learning rate per sample :math:`\eta` : 0.1 / 256
       + decay: similar to `Deep Residual Learning for Image Recognition`_, we reduce learning rate by 1/10 at the 82-th and 109-th epoch.
-      + scaling and warmup: apply ``linear scaling rule`` mentioned in goyal2017accurate_. The learning rate per worker is scaled from
+      + scaling and warmup: apply ``linear scaling rule`` mentioned in [goyal2017accurate]_. The learning rate per worker is scaled from
         :math:`\eta \times b` to :math:`\eta \times b \times k` within the first 5 epochs.
 
     - momentum: 0.9

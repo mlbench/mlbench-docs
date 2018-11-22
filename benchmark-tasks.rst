@@ -1,3 +1,5 @@
+.. _benchmark-tasks
+
 ==================
 Benchmarking Tasks
 ==================

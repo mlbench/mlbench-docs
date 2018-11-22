@@ -2,8 +2,14 @@
 mlbench: Distributed Machine Learning Benchmark
 ===============================================
 
-.. image:: https://travis-ci.com/mlbench/mlbench.svg?branch=develop
-    :target: https://travis-ci.com/mlbench/mlbench
+.. image:: https://travis-ci.com/mlbench/mlbench-core.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-core
+
+.. image:: https://travis-ci.com/mlbench/mlbench-dashboard.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-dashboard
+
+.. image:: https://travis-ci.com/mlbench/mlbench-helm.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-helm
 
 .. image:: https://readthedocs.org/projects/mlbench/badge/?version=latest
         :target: https://mlbench.readthedocs.io/en/latest/?badge=latest

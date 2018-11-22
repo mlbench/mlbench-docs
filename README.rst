@@ -11,6 +11,9 @@ mlbench: Distributed Machine Learning Benchmark
 .. image:: https://travis-ci.com/mlbench/mlbench-helm.svg?branch=develop
     :target: https://travis-ci.com/mlbench/mlbench-helm
 
+.. image:: https://travis-ci.com/mlbench/mlbench-benchmarks.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-benchmarks
+
 .. image:: https://readthedocs.org/projects/mlbench/badge/?version=latest
         :target: https://mlbench.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status

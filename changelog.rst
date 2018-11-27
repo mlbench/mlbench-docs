@@ -15,8 +15,6 @@ Change Log
 -  Move worker code to mlbench-core repo
    `#1 <https://github.com/mlbench/mlbench-core/issues/1>`__
 
-Change Log
-==========
 
 `0.1.0 <https://github.com/mlbench/mlbench/tree/0.1.0>`__ (2018-09-14)
 ----------------------------------------------------------------------

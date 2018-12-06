@@ -2,8 +2,17 @@
 mlbench: Distributed Machine Learning Benchmark
 ===============================================
 
-.. image:: https://travis-ci.com/mlbench/mlbench.svg?branch=develop
-    :target: https://travis-ci.com/mlbench/mlbench
+.. image:: https://travis-ci.com/mlbench/mlbench-core.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-core
+
+.. image:: https://travis-ci.com/mlbench/mlbench-dashboard.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-dashboard
+
+.. image:: https://travis-ci.com/mlbench/mlbench-helm.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-helm
+
+.. image:: https://travis-ci.com/mlbench/mlbench-benchmarks.svg?branch=develop
+    :target: https://travis-ci.com/mlbench/mlbench-benchmarks
 
 .. image:: https://readthedocs.org/projects/mlbench/badge/?version=latest
         :target: https://mlbench.readthedocs.io/en/latest/?badge=latest
@@ -30,6 +39,16 @@ Features
 * Independently of all solver implementations, we provide universal **evaluation code** allowing to compare the result metrics of different solvers and frameworks.
 * Our benchmark code is easy to run on **public clouds**.
 
+
+Repositories
+------------
+MLBench consists of 5 Github repositories:
+
+* Documentation: http://github.com/mlbench/mlbench-docs
+* Helm Charts for Kubernetes: http://github.com/mlbench/mlbench-helm
+* Python Core Library: http://github.com/mlbench/mlbench-core
+* Closed-Division Benchmark Implementations: http://github.com/mlbench/mlbench-benchmarks
+* Dashboard: http://github.com/mlbench/mlbench-dashboard
 
 
 Community

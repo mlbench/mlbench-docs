@@ -1,6 +1,56 @@
 Change Log
 ==========
 
+v1.1.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.1.0 <https://github.com/mlbench/mlbench-core/tree/v1.1.0>`__ (2018-12-06)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.0.0...v1.1.0>`__
+
+**Fixed bugs:**
+
+-  Bug when saving checkpoints
+   `#13 <https://github.com/mlbench/mlbench-core/issues/13>`__
+
+**Implemented enhancements:**
+
+-  Adds Tensorflow Controlflow, Dataset and Model code
+-  Adds Pytorch linear models
+-  Adds sparsified and decentralized optimizers
+
+MLBench Benchmarks
+""""""""""""""""""
+
+**Implemented enhancements:**
+
+-  Added Tensorflow Benchmark
+
+MLBench Dashboard
+"""""""""""""""""
+
+**Implemented enhancements:**
+
+- Added new Tensorflow Benchmark Image
+- Remove Bandwidth limiting
+- Added ability to run custom images in dashboard
+
+MLBench Helm
+""""""""""""
+
+Nothing
+
+v1.0.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
 `1.0.0 <https://github.com/mlbench/mlbench-core/tree/1.0.0>`__ (2018-11-15)
 ---------------------------------------------------------------------------
 
@@ -15,8 +65,11 @@ Change Log
 -  Move worker code to mlbench-core repo
    `#1 <https://github.com/mlbench/mlbench-core/issues/1>`__
 
-Change Log
-==========
+v0.1.0
+^^^^^^
+
+Main Repo
+"""""""""
 
 `0.1.0 <https://github.com/mlbench/mlbench/tree/0.1.0>`__ (2018-09-14)
 ----------------------------------------------------------------------

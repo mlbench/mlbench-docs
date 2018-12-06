@@ -1,4 +1,4 @@
-.. _benchmark-tasks
+.. _benchmark-tasks:
 
 ==================
 Benchmarking Tasks
@@ -124,7 +124,7 @@ Implementation details:
     We followed the same approach as mentioned `here <https://arxiv.org/abs/1512.03385>`__.
 
 #. **Selection of Framework & Systems**
-    While our initial reference implementation is currently PyTorch, we will aim to provide the same algorithm in more frameworks very soon, starting with Tensorflow. For the systems, kubernetes allows easy transferability of our code. While initial results reported are from google kubernetes engine, AWS will be supported very soon.
+    We aim to provide the same algorithm in multiple frameworks, primarily focussing on PyTorch and Tensorflow. For the systems, kubernetes allows easy transferability of our code. While initial results reported are from google kubernetes engine, AWS will be supported very soon.
 
 #. **Environments for Scaling Task**
     For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
@@ -226,6 +226,12 @@ Here we present the results for scaling task.
 
 .. |pic6| image:: images/SGD_Relative_Speedups.png
     :scale: 48
+
+
+Benchmark Task Implementations
+------------------------------
+
+For details on the available Benchmark implementations, please see :doc:`Benchmarking Implementations <mlbench-benchmarks:benchmark-implementations>` .
 
 
 .. rubric:: References

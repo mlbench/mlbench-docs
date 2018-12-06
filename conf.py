@@ -65,10 +65,10 @@ copyright = '2018 MLBench development team'
 #rtd_version = 'latest'
 
 intersphinx_mapping = {
-    'mlbench-helm': ('http://mlbench.readthedocs.io/projects/mlbench_helm/en/%s/' % rtd_version, None),
-    'dashboard': ('http://mlbench.readthedocs.io/projects/mlbench_dashboard/en/%s/' % rtd_version, None),
-    'mlbench-benchmarks': ('http://mlbench.readthedocs.io/projects/mlbench-benchmarks/en/%s/' % rtd_version, None),
-    'core': ('http://mlbench.readthedocs.io/projects/mlbench_core/en/%s/' % rtd_version, None),
+    'mlbench-helm': ('https://mlbench.readthedocs.io/projects/mlbench_helm/en/%s/' % rtd_version, None),
+    'dashboard': ('https://mlbench.readthedocs.io/projects/mlbench_dashboard/en/%s/' % rtd_version, None),
+    'mlbench-benchmarks': ('https://mlbench.readthedocs.io/projects/mlbench_benchmarks/en/%s/' % rtd_version, None),
+    'core': ('https://mlbench.readthedocs.io/projects/mlbench_core/en/%s/' % rtd_version, None),
 }
 
 # The version info for the project you're documenting, acts as replacement for

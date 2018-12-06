@@ -231,7 +231,7 @@ Here we present the results for scaling task.
 Benchmark Task Implementations
 ------------------------------
 
-For details on the available Benchmark implementations, please see :doc:`Benchmarking Implementations <mlbench-benchmarks:benchmark-implementations>` .
+For details on the available Benchmark implementations, please see :ref:`Benchmarking Implementations <mlbench-benchmarks:benchmark-implementations>` .
 
 
 .. rubric:: References

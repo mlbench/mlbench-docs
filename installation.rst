@@ -20,7 +20,6 @@ You can save them in a yaml file of your chosing. This guide will assume you sav
    limits:
      workers:
      cpu:
-     bandwidth:
      gpu:
 
    gcePersistentDisk:
@@ -29,7 +28,6 @@ You can save them in a yaml file of your chosing. This guide will assume you sav
 
 - ``limits.workers`` is the maximum number of worker nodes available to mlbench. This sets the maximum number of nodes that can be chosen for an experiment in the UI. By default mlbench starts 2 workers on startup.
 - ``limits.cpu`` is the maximum number of CPUs (Cores) available on each worker node. Uses Kubernetes notation (`8` or `8000m` for 8 cpus/cores). This is also the maximum number of Cores that can be selected for an experiment in the UI
-- ``limits.bandwidth`` is the maximum network bandwidth available between workers, in mbit per second. This is the default bandwidth used and the maximum number selectable in the UI.
 - ``limits.gpu`` is the number of gpus requested by each worker pod.
 - ``gcePersistentDisk.enabled`` create resources related to NFS persistentVolume and persistentVolumeClaim.
 - ``gcePersistentDisk.pdName`` is the name of persistent disk existed in GKE.

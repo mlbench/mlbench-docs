@@ -5,3 +5,5 @@ __pycache__
 _build
 
 _sidebar.rst.inc
+
+.DS_Store

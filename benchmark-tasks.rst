@@ -186,12 +186,8 @@ TODO
 #. **Training Algorithm**
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
 
-    - minibatch size per worker :math:`b`: 1
-    - maximum epochs: 164
-    - learning rate : :math:`\frac{\alpha}{\beta + t}`
-
-      + :math:`\alpha=10000, \beta=10`
-
+    - minibatch size per worker :math:`b`: 100
+    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`
     - momentum: 0
     - nesterov: False
     - weight decay: 0
@@ -209,23 +205,56 @@ Implementation details:
 
 **Results**
 
-Here we present the results for scaling task.
 
-* The left figure is an epoch to loss curve. It shows regardless of the cluster size, SGD
-  converges to the same loss value after 2-3 epochs.
+Here we present the results for the scaling task.
+
+* First figure shows the speedup of time to accuracy, for accuracy of 89%, as the size of the cluster increases.
+  Even though initially the speedup grows with the number of nodes added to the cluster, 
+  the benefit starts dropping for a cluster bigger than 16 nodes. This is mostly due to the issue of 
+  large-batch training. As the local batch-size of each worker is fixed, the global batch-size increases 
+  with the number of workers. Hence, while increasing batch size up to a point makes the training faster, 
+  beyond a certain point it will no longer reduce the number of training steps required, making it slower 
+  to reach the same accuracy.
 
 
-* The right hand side figure shows the speedup we get as we scale the size of the
-  cluster. As we increase the number of workers, the communication overhead becomes
-  the bottleneck and slows down the process.
+* Second figure illustrates how the loss value drops over time for various number of nodes. 
+  The black dotted line shows the target loss value, which is 0.2828 for this particular dataset.
+
+* Last figure shows the average communication-computation time ratio for a node in the cluster. 
+  As we expected, the more workers we have, the more time is spent in communication.
+
+
+Learning Rate: 
+    We use time-based learning rate decay schedule equation :math:`\frac{\alpha}{\sqrt{t}}` and we tune  for each cluster size separately. 
+    Based on our observation, in order to achieve the expected loss/accuracy value, parameter 
+    should increase with the number of workers in the cluster. Here are the values of alpha we choose 
+    for various number of workers based on our experiments and observations:
+
+
+        ==========     ===============  
+        nodes          :math:`\alpha`   
+        ==========     =============== 
+        1                 200  
+        2                 400  
+        4                 600   
+        8                 700
+        16, 32, 64        800
+        ==========     ===============   
+
 
 |pic5| |pic6|
+ 
+|pic7|
 
-.. |pic5| image:: images/SGD_loss_epochs.png
+.. |pic5| image:: images/SGD_time_to_accuracy.png
     :scale: 48
 
-.. |pic6| image:: images/SGD_Relative_Speedups.png
+.. |pic6| image:: images/SGD_loss_time.png
     :scale: 48
+
+.. |pic7| image:: images/communication_time_ratio.png
+    :scale: 48
+
 
 
 Benchmark Task Implementations

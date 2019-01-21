@@ -185,19 +185,9 @@ TODO
 #. **Training Algorithm**
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
 
-    - minibatch size per worker :math:`b`: 100
-        We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size 
-        that enables the trained model to reach to 89% accuracy on the validation set in less time. we use 
-        80% of the dataset to train the model, and the remaining 20% is used as the validation set.
-
-    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}` 
-        We tune :math:`\alpha` for each cluster size separately. To do so, we use 80% of the dataset to train 
-        the model, and the remaining 20% is used as the validation set. We do a grid search to find the best 
-        value for alpha: for each value in the grid ([0.001,..,1000]), the model is trained until it reaches 
-        to 89% accuracy on the validation set. Finally, we select the value that enables the model to reach 
-        the target accuracy value faster.
-        Here are the values of alpha we choose for various number of workers based on our experiments 
-        and observations:
+    - minibatch size per worker :math:`b`: 100  [1]_
+    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`  [2]_
+        Here are the values of alpha we choose for various number of workers:
 
         ==========     ===============  
         nodes          :math:`\alpha`   
@@ -209,11 +199,20 @@ TODO
         16, 32, 64        800
         ==========     ===============   
     - momentum: 0
-    - nesterov: False
     - weight decay: 0
     - regularization rate :math:`= 0.0000025`
 
-Implementation details:
+.. [1]  Here is how we select this value:
+        We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size 
+        that enables the trained model to reach to 89% accuracy on the validation set in less time. we use 
+        80% of the dataset to train the model, and the remaining 20% is used as the validation set.
+.. [2] :math:`\alpha` is tuned for each cluster size separately. To do so, we use 80% of the dataset to train 
+        the model, and the remaining 20% is used as the validation set. We do a grid search to find the best 
+        value for alpha: for each value in the grid ([0.001,..,1000]), the model is trained until it reaches 
+        to 89% accuracy on the validation set. Finally, we select the value that enables the model to reach 
+        the target accuracy value faster.
+
+**Implementation details:**
 
 #. **Selection of Framework & Systems**
     While our initial reference implementation is currently PyTorch, we will aim to provide the same algorithm in more frameworks very soon, starting with Tensorflow. For the systems, kubernetes allows easy transferability of our code. While initial results reported are from google kubernetes engine, AWS will be supported very soon.
@@ -256,8 +255,6 @@ Here we present the results for the scaling task.
 
 .. |pic7| image:: images/communication_time_ratio.png
     :scale: 48
-
-
 
 Benchmark Task Implementations
 ------------------------------

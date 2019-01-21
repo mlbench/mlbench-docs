@@ -177,7 +177,6 @@ TODO
 #. **Model**
     We benchmark Logistic Regression with L2 regularization.
 #. **Dataset**
-
     The `epsilon <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html>`_ dataset
     is an artificial and dense dataset which is used for Pascal large scale learning challenge
     in `2008 <http://www.k4all.org/project/large-scale-learning-challenge/>`_.
@@ -187,7 +186,28 @@ TODO
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
 
     - minibatch size per worker :math:`b`: 100
-    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`
+        We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size 
+        that enables the trained model to reach to 89% accuracy on the validation set in less time. we use 
+        80% of the dataset to train the model, and the remaining 20% is used as the validation set.
+
+    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}` 
+        We tune :math:`\alpha` for each cluster size separately. To do so, we use 80% of the dataset to train 
+        the model, and the remaining 20% is used as the validation set. We do a grid search to find the best 
+        value for alpha: for each value in the grid ([0.001,..,1000]), the model is trained until it reaches 
+        to 89% accuracy on the validation set. Finally, we select the value that enables the model to reach 
+        the target accuracy value faster.
+        Here are the values of alpha we choose for various number of workers based on our experiments 
+        and observations:
+
+        ==========     ===============  
+        nodes          :math:`\alpha`   
+        ==========     =============== 
+            1                 200  
+            2                 400  
+            4                 600   
+            8                 700
+        16, 32, 64        800
+        ==========     ===============   
     - momentum: 0
     - nesterov: False
     - weight decay: 0
@@ -208,7 +228,7 @@ Implementation details:
 
 Here we present the results for the scaling task.
 
-* First figure shows the speedup of time to accuracy, for accuracy of 89%, as the size of the cluster increases.
+* First figure shows the speedup of time to accuracy, for test accuracy of 89%, as the size of the cluster increases.
   Even though initially the speedup grows with the number of nodes added to the cluster, 
   the benefit starts dropping for a cluster bigger than 16 nodes. This is mostly due to the issue of 
   large-batch training. As the local batch-size of each worker is fixed, the global batch-size increases 
@@ -222,24 +242,6 @@ Here we present the results for the scaling task.
 
 * Last figure shows the average communication-computation time ratio for a node in the cluster. 
   As we expected, the more workers we have, the more time is spent in communication.
-
-
-Learning Rate: 
-    We use time-based learning rate decay schedule equation :math:`\frac{\alpha}{\sqrt{t}}` and we tune  for each cluster size separately. 
-    Based on our observation, in order to achieve the expected loss/accuracy value, parameter 
-    should increase with the number of workers in the cluster. Here are the values of alpha we choose 
-    for various number of workers based on our experiments and observations:
-
-
-        ==========     ===============  
-        nodes          :math:`\alpha`   
-        ==========     =============== 
-        1                 200  
-        2                 400  
-        4                 600   
-        8                 700
-        16, 32, 64        800
-        ==========     ===============   
 
 
 |pic5| |pic6|

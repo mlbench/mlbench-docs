@@ -177,7 +177,6 @@ TODO
 #. **Model**
     We benchmark Logistic Regression with L2 regularization.
 #. **Dataset**
-
     The `epsilon <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html>`_ dataset
     is an artificial and dense dataset which is used for Pascal large scale learning challenge
     in `2008 <http://www.k4all.org/project/large-scale-learning-challenge/>`_.
@@ -186,18 +185,34 @@ TODO
 #. **Training Algorithm**
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
 
-    - minibatch size per worker :math:`b`: 1
-    - maximum epochs: 164
-    - learning rate : :math:`\frac{\alpha}{\beta + t}`
+    - minibatch size per worker :math:`b`: 100  [1]_
+    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`  [2]_
+        Here are the values of alpha we choose for various number of workers:
 
-      + :math:`\alpha=10000, \beta=10`
-
+        ==========     ===============  
+        nodes          :math:`\alpha`   
+        ==========     =============== 
+            1                 200  
+            2                 400  
+            4                 600   
+            8                 700
+        16, 32, 64        800
+        ==========     ===============   
     - momentum: 0
-    - nesterov: False
     - weight decay: 0
     - regularization rate :math:`= 0.0000025`
 
-Implementation details:
+.. [1]  Here is how we select this value:
+        We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size 
+        that enables the trained model to reach to 89% accuracy on the validation set in less time. we use 
+        80% of the dataset to train the model, and the remaining 20% is used as the validation set.
+.. [2] :math:`\alpha` is tuned for each cluster size separately. To do so, we use 80% of the dataset to train 
+        the model, and the remaining 20% is used as the validation set. We do a grid search to find the best 
+        value for alpha: for each value in the grid ([0.001,..,1000]), the model is trained until it reaches 
+        to 89% accuracy on the validation set. Finally, we select the value that enables the model to reach 
+        the target accuracy value faster.
+
+**Implementation details:**
 
 #. **Selection of Framework & Systems**
     While our initial reference implementation is currently PyTorch, we will aim to provide the same algorithm in more frameworks very soon, starting with Tensorflow. For the systems, kubernetes allows easy transferability of our code. While initial results reported are from google kubernetes engine, AWS will be supported very soon.
@@ -209,24 +224,37 @@ Implementation details:
 
 **Results**
 
-Here we present the results for scaling task.
 
-* The left figure is an epoch to loss curve. It shows regardless of the cluster size, SGD
-  converges to the same loss value after 2-3 epochs.
+Here we present the results for the scaling task.
+
+* First figure shows the speedup of time to accuracy, for test accuracy of 89%, as the size of the cluster increases.
+  Even though initially the speedup grows with the number of nodes added to the cluster, 
+  the benefit starts dropping for a cluster bigger than 16 nodes. This is mostly due to the issue of 
+  large-batch training. As the local batch-size of each worker is fixed, the global batch-size increases 
+  with the number of workers. Hence, while increasing batch size up to a point makes the training faster, 
+  beyond a certain point it will no longer reduce the number of training steps required, making it slower 
+  to reach the same accuracy.
 
 
-* The right hand side figure shows the speedup we get as we scale the size of the
-  cluster. As we increase the number of workers, the communication overhead becomes
-  the bottleneck and slows down the process.
+* Second figure illustrates how the loss value drops over time for various number of nodes. 
+  The black dotted line shows the target loss value, which is 0.2828 for this particular dataset.
+
+* Last figure shows the average communication-computation time ratio for a node in the cluster. 
+  As we expected, the more workers we have, the more time is spent in communication.
+
 
 |pic5| |pic6|
+ 
+|pic7|
 
-.. |pic5| image:: images/SGD_loss_epochs.png
+.. |pic5| image:: images/SGD_time_to_accuracy.png
     :scale: 48
 
-.. |pic6| image:: images/SGD_Relative_Speedups.png
+.. |pic6| image:: images/SGD_loss_time.png
     :scale: 48
 
+.. |pic7| image:: images/communication_time_ratio.png
+    :scale: 48
 
 Benchmark Task Implementations
 ------------------------------

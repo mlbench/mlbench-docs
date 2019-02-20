@@ -19,8 +19,8 @@ Google Cloud
 
 For Google Cloud see: `Creating a Cluster <https://cloud.google.com/kubernetes-engine/docs/how-to/creating-a-cluster>`_ and `Kubernetes Quickstart <https://cloud.google.com/kubernetes-engine/docs/quickstart>`_.
 
-Cluster setup in Google Cloud is handled by running a setup script, a
-s described in the `Installation <https://mlbench.readthedocs.io/en/latest/installation.html#>`_ section.
+Cluster setup in Google Cloud is handled by running a setup script detailed in the Installation section. Concerning this, please refer to :ref:`google-cloud-setup`.
+
 
 If you're planning to use GPUs in your cluster, see the `GPUs <https://cloud.google.com/kubernetes-engine/docs/how-to/gpus>`_ article, especially the "Installing NVIDIA GPU device drivers" section.
 

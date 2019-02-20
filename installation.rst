@@ -7,6 +7,8 @@ Make sure to read :doc:`prerequisites` before installing mlbench.
 
 All guides assume you have checked out the `mlbench-helm <https://github.com/mlbench/mlbench-helm>`__ github repository and have a terminal open in the checked-out ``mlbench-helm`` directory.
 
+.. _google-cloud-setup:
+
 Google Cloud and Cluster Setup
 ------------------------------
 

@@ -14,7 +14,7 @@ To setup a Cluster in Google Cloud, run the following script:
 
 .. code-block:: bash
 
-    $ ./blob/develop/google_cloud_setup.sh)
+    $ ./google_cloud_setup.sh
 
 .. _helm-charts:
 

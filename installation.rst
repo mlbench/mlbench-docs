@@ -12,11 +12,32 @@ All guides assume you have checked out the `mlbench-helm <https://github.com/mlb
 Google Cloud and Cluster Setup
 ------------------------------
 
-To setup a Cluster in Google Cloud, run the following script:
+This project provides a script to make all the Google Cloud and Cluster setup. In order to do so, please run the following commands:
 
 .. code-block:: bash
 
-    $ ./google_cloud_setup.sh
+    $ ./google_cloud_setup.sh create-cluster
+    $ ./google_cloud_setup.sh install-chart
+
+
+To delete cluster and cleanup:
+
+.. code-block:: bash
+
+    $ ./google_cloud_setup.sh delete-cluster
+
+To uninstall chart:
+
+.. code-block:: bash
+
+    $ ./google_cloud_setup.sh uninstall-chart
+
+For general information on the available commands, please run:
+
+.. code-block:: bash
+
+    $ ./google_cloud_setup.sh help
+
 
 .. _helm-charts:
 

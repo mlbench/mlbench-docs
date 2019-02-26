@@ -14,4 +14,4 @@ Core Contributors
 Contributors
 ------------
 
-None yet. Why not be the first?
+* `Luciana Marques <https://github.com/lucianamarques>`_

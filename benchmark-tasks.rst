@@ -101,6 +101,7 @@ Image classification is one of the most important problems in computer vision an
 #. **Training Algorithm**
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
 
+    - Model: Resnet 20
     - number of machines :math:`k`: 2, 4, 8, 16, 32
     - minibatch size per worker :math:`b`: 32
     - maximum epochs: 164
@@ -135,12 +136,7 @@ Implementation details:
 
 Here we present the results for scaling task.
 
-* The first figure is the validation error rate for linear scaling scheduler and benchmark with different cluster size. For 1, 2, 4, 8, 16 nodes, scaling the size of cluster gives same accuracy within same number of epochs. The global batch size is 2048 when the number of nodes is 16. For 32 or more nodes, the validation error is higher but is still decreasing; they need more epochs to converge considering there are less iterations. For all cases except 64 nodes, using linear scaling scheduler gives higher accuracy and better convergence speed.
-
-.. image:: images/scaling_epoch_prec1.png
-    :align: center
-
-* The second figure shows speedups of time-to-accuracy for Top-1 accuracy in 70%, 75%, 80%, 85%, 90%, 91%. Note that the 0 speedup means specified accuracy is not reached within the predefined maximum epochs. The linear scaling rule does not outperform baseline for accuracy <= 85%. However, in order to reach 90%+ accuracy,  using linear scaling is much better than the baseline.
+* The first figure shows speedups of time-to-accuracy for Top-1 accuracy in 70%, 75%, 80%, 85%, 90%, 91%. Note that the 0 speedup means specified accuracy is not reached within the predefined maximum epochs. The same accuracy is (relatively) much slower to reach as the number of machines grows. This is know as the issues of large-batch training. The linear scaling rule does not outperform baseline for accuracy <= 85%. However, to reach 90% or higher accuracy, using linear scaling is obviously better than the baseline.
 
 .. image:: images/val_tta.png
     :align: center

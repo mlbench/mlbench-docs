@@ -135,31 +135,15 @@ Implementation details:
 
 Here we present the results for scaling task.
 
-* The first figure is the validation error rate for linear scaling scheduler and benchmark with different cluster size. For 2, 4, 8, 16 nodes, scaling the size of cluster gives same accuracy within same number of epochs. The global batch size is 2048 when the number of nodes is 16. For 32 or more nodes, the validation error is higher but is still decreasing; they need more epochs to converge considering there are less iterations. For all cases except 64 nodes, using linear scaling scheduler gives higher accuracy and better convergence speed.
+* The first figure is the validation error rate for linear scaling scheduler and benchmark with different cluster size. For 1, 2, 4, 8, 16 nodes, scaling the size of cluster gives same accuracy within same number of epochs. The global batch size is 2048 when the number of nodes is 16. For 32 or more nodes, the validation error is higher but is still decreasing; they need more epochs to converge considering there are less iterations. For all cases except 64 nodes, using linear scaling scheduler gives higher accuracy and better convergence speed.
 
 .. image:: images/scaling_epoch_prec1.png
     :align: center
 
-* The next figure compares the actual throughput and expected throughput. Since all of the nodes use same hardwares, the perfect throughput is linearly dependent on the number of nodes. The actual throughput is marginally below than the perfect scaling due to the communication cost.
+* The second figure shows speedups of time-to-accuracy for Top-1 accuracy in 70%, 75%, 80%, 85%, 90%, 91%. Note that the 0 speedup means specified accuracy is not reached within the predefined maximum epochs. The linear scaling rule does not outperform baseline for accuracy <= 85%. However, in order to reach 90%+ accuracy,  using linear scaling is much better than the baseline.
 
-.. image:: images/scaling-throughput.png
-    :scale: 48
+.. image:: images/val_tta.png
     :align: center
-
-* The left hand side figure compares the time to 70% and 80% accuracy for different number of nodes.
-  70% accuracy is easy to reach for all of the tests and the time-to-accuracy decreases with the number of nodes.
-  For time-to-80%-accuracy, however, it spends more time on 64 nodes rather than 32 nodes.
-* The right figure compares the cost of experiment. Note that a regular n1-standard-4 instance costs $0.1900 per hour and
-  a preemptible one costs only $0.04. For experiments with 16 nodes or more, the task finishes with 24 hours and thus we can
-  use preemptible instance. The cost can be reduced correspondingly.
-
-|pic3| |pic4|
-
-.. |pic4| image:: images/scaling-time-cost.png
-    :scale: 48
-
-.. |pic3| image:: images/scaling-time-prec1.png
-    :scale: 48
 
 1b. Image Classification (ResNet, ImageNet)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

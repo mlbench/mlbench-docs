@@ -19,6 +19,9 @@ Google Cloud
 
 For Google Cloud see: `Creating a Cluster <https://cloud.google.com/kubernetes-engine/docs/how-to/creating-a-cluster>`_ and `Kubernetes Quickstart <https://cloud.google.com/kubernetes-engine/docs/quickstart>`_.
 
+Cluster setup in Google Cloud is handled by running a setup script detailed in the Installation section. Concerning this, please refer to :ref:`google-cloud-setup`.
+
+
 If you're planning to use GPUs in your cluster, see the `GPUs <https://cloud.google.com/kubernetes-engine/docs/how-to/gpus>`_ article, especially the "Installing NVIDIA GPU device drivers" section.
 
 When creating a GKE cluster, make sure to use version ``1.10.9`` or above of kubernetes, as there is an issue with DNS resolution in earlier version. You can do this with the ``--cluster-version=1.10.9``

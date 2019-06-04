@@ -132,6 +132,7 @@ Implementation details:
     Openmpi is used for communication. No accelerators are used for this task.
 
 
+
 1b. Image Classification (ResNet, ImageNet)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TODO
@@ -200,46 +201,41 @@ Benchmark Task Results
 Here we present the results for scaling task. All results were generated on the Google Cliud Kubernetes Engine. `n1-standard-4` instances were used for training,
 with `NVIDIA® Tesla® K80` GPUs used for GPU training.
 
-* The left figure is an epoch to accuracy curve. For 2, 4, 8 nodes, scaling the size of cluster gives same accuracy.
-  For 16 or more nodes, the accuracy gradually drops.
+ The first figure is the validation error rate for linear scaling scheduler and benchmark with different cluster size. For 2, 4, 8, 16 nodes, scaling the size of cluster gives same accuracy within same number of epochs. The global batch size is 2048 when the number of nodes is 16. For 32 or more nodes, the validation error is higher but is still decreasing; they need more epochs to converge considering there are less iterations. For all cases except 64 nodes, using linear scaling scheduler gives higher accuracy and better convergence speed.
 
-* The right hand side compares expected throughput with the actual throughput. From the figure, we can see the actual
-  throughput is marginally below ideal scaling.
+.. image:: images/scaling_epoch_prec1.png
+    :align: center
 
-|pic1| |pic2|
+* The next figure compares the actual throughput and expected throughput. Since all of the nodes use same hardwares, the perfect throughput is linearly dependent on the number of nodes. The actual throughput is marginally below than the perfect scaling due to the communication cost.
 
-.. |pic1| image:: images/scaling-epoch-prec1.png
-    :scale: 48 %
-
-.. |pic2| image:: images/scaling-throughput.png
+.. image:: images/scaling-throughput.png
     :scale: 48
+    :align: center
 
 
-* The top figure shows the speedup in training times relative to training on one node. Training on CPU shows speedsup with increasing number of nodes up to 32 nodes.
+* The next figure shows the speedup in training times relative to training on one node. Training on CPU shows speedsup with increasing number of nodes up to 32 nodes.
   For the Pytorch implementation on the GPU, speedups plateau at 4 nodes and decrease for 32 nodes. Tensorflow GPU numbers are only available up to 8 nodes, as more nodes
   lead to an Out-Of-Memory error on the GPU. This could indicate a technical limitation in the Tensorflow benchmark.
 
-* The bottom figure hand side figure compares the time to 80% accuracy for different number of nodes. Times on the GPU are up to a factor of 10 faster than the respective
+.. image:: images/task1a_speedup.png
+    :scale: 48
+    :align: center
+
+* The next figure hand side figure compares the time to 80% accuracy for different number of nodes. Times on the GPU are up to a factor of 10 faster than the respective
   CPU implementation.
 
-
-
-|pic3| |pic4|
-
-.. |pic4| image:: images/task1a_training_times.png
+.. image:: images/task1a_training_times.png
     :scale: 48
-
-.. |pic3| image:: images/task1a_speedup.png
-    :scale: 48
+    :align: center
 
 
-* This figure compares the cost of experiment. Note that a regular `n1-standard-4` instance costs $0.19 per hour and
+
+* The next figure compares the cost of experiment. Note that a regular `n1-standard-4` instance costs $0.19 per hour and
   a preemptible one costs only $0.04. `NVIDIA® Tesla® K80` GPUs (preemtpible) cost $0.135 per hour. All costs shown are for premtible instances.
 
-|pic8|
-
-.. |pic8| image:: images/task1a_pricing.png
+.. image:: images/task1a_pricing.png
     :scale: 48
+    :align: center
 
 
 

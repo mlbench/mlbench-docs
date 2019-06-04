@@ -6,4 +6,5 @@ _build
 
 _sidebar.rst.inc
 
+.DS_Store
 .vscode/

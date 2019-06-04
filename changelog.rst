@@ -1,6 +1,112 @@
 Change Log
 ==========
 
+v1.3.4
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.3.4 <https://github.com/mlbench/mlbench-core/tree/v1.3.4>`__ (2019-03-20)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.3.3...v1.3.4>`__
+
+**Implemented enhancements:**
+
+-  in controlflow, don't mix train and validation
+   `#20 <https://github.com/mlbench/mlbench-core/issues/20>`__
+
+**Fixed bugs:**
+
+-  Add metrics logging for Tensorflow
+   `#19 <https://github.com/mlbench/mlbench-core/issues/19>`__
+
+v1.3.3
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.3.3 <https://github.com/mlbench/mlbench-core/tree/v1.3.3>`__ (2019-02-26)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.3.2...v1.3.3>`__
+
+v1.3.2
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.3.2 <https://github.com/mlbench/mlbench-core/tree/v1.3.2>`__ (2019-02-13)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.3.1...v1.3.2>`__
+
+v1.3.1
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.3.1 <https://github.com/mlbench/mlbench-core/tree/v1.3.1>`__ (2019-02-13)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.3.0...v1.3.1>`__
+
+v1.3.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.3.0 <https://github.com/mlbench/mlbench-core/tree/v1.3.0>`__ (2019-02-12)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.2.1...v1.3.0>`__
+
+v1.2.1
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.2.1 <https://github.com/mlbench/mlbench-core/tree/v1.2.1>`__ (2019-01-31)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.2.0...v1.2.1>`__
+
+v1.2.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.2.0 <https://github.com/mlbench/mlbench-core/tree/v1.2.0>`__ (2019-01-30)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.1.1...v1.2.0>`__
+
+v1.1.1
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v1.1.1 <https://github.com/mlbench/mlbench-core/tree/v1.1.1>`__ (2019-01-09)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v1.1.0...v1.1.1>`__
+
 v1.1.0
 ^^^^^^
 

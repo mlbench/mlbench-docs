@@ -4,7 +4,7 @@
 Benchmarking Tasks
 ==================
 
-The results of the benchmarks can be found here: :ref:`Benchmark Task Results`
+The results of the benchmarks can be found here: benchmark-task-results_
 
 
 Benchmark Divisions
@@ -187,6 +187,9 @@ TODO
     Openmpi is used for communication. No accelerators are used for this task.
 
 
+
+
+.. _benchmark-task-results:
 
 Benchmark Task Results
 ----------------------

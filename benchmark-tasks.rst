@@ -4,6 +4,8 @@
 Benchmarking Tasks
 ==================
 
+The results of the benchmarks can be found here: benchmark-task-results_
+
 
 Benchmark Divisions
 -------------------
@@ -47,19 +49,13 @@ The shorter the better.
     https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf
 
 
-Here is a plot of validation error training iterations for ResNet on `CIFAR-10 <http://www.cs.toronto.edu/~kriz/cifar.html>`__ using the settings from `Deep Residual Learning for Image Recognition`_.
-
-.. image:: images/km2016deep.png
-    :align: center
-
-
 Open Division
 ~~~~~~~~~~~~~
 The Open Division allows you to implement your own algorithms and training tricks and compare them to other implementations. There's little limit to what can be changed by you and as such, it is up to you to make sure that comparisons are fair.
 
 In this division, mlbench merely provides a platform to easily perform and measure distributed machine learning experiments in a standardized way.
 
-
+The Open Division is **a work in progress** and as such not yet publicly available.
 
 
 Benchmark Task Descriptions
@@ -131,39 +127,7 @@ Implementation details:
     There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
     Openmpi is used for communication. No accelerators are used for this task.
 
-**Results**
 
-Here we present the results for scaling task.
-
-* The left figure is an epoch to accuracy curve. For 2, 4, 8 nodes, scaling the size of cluster gives same accuracy.
-  For 16 or more nodes, the accuracy gradually drops.
-
-* The right hand side compares expected throughput with the actual throughput. From the figure, we can see the actual
-  throughput is marginally below ideal scaling.
-
-|pic1| |pic2|
-
-.. |pic1| image:: images/scaling-epoch-prec1.png
-    :scale: 48 %
-
-.. |pic2| image:: images/scaling-throughput.png
-    :scale: 48
-
-
-* The left figure hand side figure compares the time to 70% and 80% accuracy for different number of nodes.
-  70% accuracy is easy to reach for all of the tests and the time-to-accuracy decreases with the number of nodes.
-  For time-to-80%-accuracy, however, it spends more time on 64 nodes rather than 32 nodes.
-* The right figure compares the cost of experiment. Note that a regular n1-standard-4 instance costs $0.1900 per hour and
-  a preemptible one costs only $0.04. For experiments with 16 nodes or more, the task finishes with 24 hours and thus we can
-  use preemptible instance. The cost can be reduced correspondingly.
-
-|pic3| |pic4|
-
-.. |pic4| image:: images/scaling-time-cost.png
-    :scale: 48
-
-.. |pic3| image:: images/scaling-time-prec1.png
-    :scale: 48
 
 1b. Image Classification (ResNet, ImageNet)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -172,12 +136,11 @@ TODO
 
 
 2a. Linear Learning (Logistic Regression, epsilon)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #. **Model**
     We benchmark Logistic Regression with L2 regularization.
 #. **Dataset**
-
     The `epsilon <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html>`_ dataset
     is an artificial and dense dataset which is used for Pascal large scale learning challenge
     in `2008 <http://www.k4all.org/project/large-scale-learning-challenge/>`_.
@@ -186,18 +149,34 @@ TODO
 #. **Training Algorithm**
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
 
-    - minibatch size per worker :math:`b`: 1
-    - maximum epochs: 164
-    - learning rate : :math:`\frac{\alpha}{\beta + t}`
+    - minibatch size per worker :math:`b`: 100  [1]_
+    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`  [2]_
+        Here are the values of alpha we choose for various number of workers:
 
-      + :math:`\alpha=10000, \beta=10`
-
+        ==========     ===============
+        nodes          :math:`\alpha`
+        ==========     ===============
+            1                 200
+            2                 400
+            4                 600
+            8                 700
+        16, 32, 64        800
+        ==========     ===============
     - momentum: 0
-    - nesterov: False
     - weight decay: 0
     - regularization rate :math:`= 0.0000025`
 
-Implementation details:
+.. [1]  Here is how we select this value:
+        We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size
+        that enables the trained model to reach to 89% accuracy on the validation set in less time. we use
+        80% of the dataset to train the model, and the remaining 20% is used as the validation set.
+.. [2] :math:`\alpha` is tuned for each cluster size separately. To do so, we use 80% of the dataset to train
+        the model, and the remaining 20% is used as the validation set. We do a grid search to find the best
+        value for alpha: for each value in the grid ([0.001,..,1000]), the model is trained until it reaches
+        to 89% accuracy on the validation set. Finally, we select the value that enables the model to reach
+        the target accuracy value faster.
+
+**Implementation details:**
 
 #. **Selection of Framework & Systems**
     While our initial reference implementation is currently PyTorch, we will aim to provide the same algorithm in more frameworks very soon, starting with Tensorflow. For the systems, kubernetes allows easy transferability of our code. While initial results reported are from google kubernetes engine, AWS will be supported very soon.
@@ -207,31 +186,92 @@ Implementation details:
     There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
     Openmpi is used for communication. No accelerators are used for this task.
 
-**Results**
-
-Here we present the results for scaling task.
-
-* The left figure is an epoch to loss curve. It shows regardless of the cluster size, SGD
-  converges to the same loss value after 2-3 epochs.
 
 
-* The right hand side figure shows the speedup we get as we scale the size of the
-  cluster. As we increase the number of workers, the communication overhead becomes
-  the bottleneck and slows down the process.
+
+.. _benchmark-task-results:
+
+Benchmark Task Results
+----------------------
+
+1a. Image Classification (ResNet, CIFAR-10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here we present the results for scaling task. All results were generated on the Google Cloud Kubernetes Engine. `n1-standard-4` instances were used for training,
+with `NVIDIA® Tesla® K80` GPUs used for GPU training.
+
+
+* The next figure shows the speedup in training times to 80% accuracy relative to training on one node [3]_. The baseline time for 1 worker for the PyTorch CPU implementation is
+  5895 s, for the PyTorch GPU implementation 407 s and for the Tensorflow GPU implementation 1191 s.
+
+.. image:: images/task1a_speedup.png
+    :scale: 48
+    :align: center
+
+
+
+* The next figure compares the cost of experiment. Note that a regular `n1-standard-4` instance costs $0.19 per hour and
+  a preemptible one costs only $0.04. `NVIDIA® Tesla® K80` GPUs (preemtpible) cost $0.135 per hour. All costs shown are for premtible instances.
+
+.. image:: images/task1a_pricing.png
+    :scale: 48
+    :align: center
+
+
+.. [3] Training on CPU shows speedup with increasing number of nodes up to 32 nodes.
+       For the Pytorch implementation on the GPU, speedups plateau at 4 nodes and decrease for 32 nodes. Tensorflow GPU numbers are only available up to 8 nodes, as more nodes
+       lead to an Out-Of-Memory error on the GPU. This benchmark is still a work in progress and this issue will be fixed in a future release. Also since Tensorflow requires at least one
+       parameter-server and a worker to run, it can't be run on a single machine. As such, the results between PyTorch and Tensorflow are not directly comparable. Tuning the Tensorflow
+       parameter-server in size when growing the number of total machines might require further tuning
+
+
+
+
+1b. Image Classification (ResNet, ImageNet)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TODO
+
+
+
+2a. Linear Learning (Logistic Regression, epsilon)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here we present the results for the scaling task.
+
+* First figure shows the speedup of time to accuracy, for test accuracy of 89%, as the size of the cluster increases.
+  Even though initially the speedup grows with the number of nodes added to the cluster,
+  the benefit starts dropping for a cluster bigger than 16 nodes. This is mostly due to the issue of
+  large-batch training. As the local batch-size of each worker is fixed, the global batch-size increases
+  with the number of workers. Hence, while increasing batch size up to a point makes the training faster,
+  beyond a certain point it will no longer reduce the number of training steps required, making it slower
+  to reach the same accuracy.
+
+
+* Second figure illustrates how the loss value drops over time for various number of nodes.
+  The black dotted line shows the target loss value, which is 0.2828 for this particular dataset.
+
+* Last figure shows the average communication-computation time ratio for a node in the cluster.
+  As we expected, the more workers we have, the more time is spent in communication.
+
 
 |pic5| |pic6|
 
-.. |pic5| image:: images/SGD_loss_epochs.png
+|pic7|
+
+.. |pic5| image:: images/SGD_time_to_accuracy.png
     :scale: 48
 
-.. |pic6| image:: images/SGD_Relative_Speedups.png
+.. |pic6| image:: images/SGD_loss_time.png
     :scale: 48
 
+.. |pic7| image:: images/communication_time_ratio.png
+    :scale: 48
 
 Benchmark Task Implementations
 ------------------------------
 
 For details on the available Benchmark implementations, please see :ref:`Benchmarking Implementations <mlbench-benchmarks:benchmark-implementations>` .
+
 
 
 .. rubric:: References

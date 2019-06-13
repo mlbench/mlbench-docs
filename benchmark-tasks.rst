@@ -4,6 +4,8 @@
 Benchmarking Tasks
 ==================
 
+The results of the benchmarks can be found here: :ref:`Benchmark Task Results`
+
 
 Benchmark Divisions
 -------------------
@@ -47,19 +49,13 @@ The shorter the better.
     https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf
 
 
-Here is a plot of validation error training iterations for ResNet on `CIFAR-10 <http://www.cs.toronto.edu/~kriz/cifar.html>`__ using the settings from `Deep Residual Learning for Image Recognition`_.
-
-.. image:: images/km2016deep.png
-    :align: center
-
-
 Open Division
 ~~~~~~~~~~~~~
 The Open Division allows you to implement your own algorithms and training tricks and compare them to other implementations. There's little limit to what can be changed by you and as such, it is up to you to make sure that comparisons are fair.
 
 In this division, mlbench merely provides a platform to easily perform and measure distributed machine learning experiments in a standardized way.
 
-
+The Open Division is **a work in progress** and as such not yet publicly available.
 
 
 Benchmark Task Descriptions
@@ -221,7 +217,10 @@ with `NVIDIA® Tesla® K80` GPUs used for GPU training.
 
 .. [3] Training on CPU shows speedup with increasing number of nodes up to 32 nodes.
        For the Pytorch implementation on the GPU, speedups plateau at 4 nodes and decrease for 32 nodes. Tensorflow GPU numbers are only available up to 8 nodes, as more nodes
-       lead to an Out-Of-Memory error on the GPU. This could indicate a technical limitation in the Tensorflow benchmark.
+       lead to an Out-Of-Memory error on the GPU. This benchmark is still a work in progress and this issue will be fixed in a future release. Also since Tensorflow requires at least one
+       parameter-server and a worker to run, it can't be run on a single machine. As such, the results between PyTorch and Tensorflow are not directly comparable. Tuning the Tensorflow
+       parameter-server in size when growing the number of total machines might require further tuning
+
 
 
 

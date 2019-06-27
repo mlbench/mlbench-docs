@@ -98,7 +98,7 @@ Image classification is one of the most important problems in computer vision an
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
 
     - number of machines :math:`k`: 2, 4, 8, 16, 32
-    - minibatch size per worker :math:`b`: 32
+    - minibatch size per worker :math:`b`: 128
     - maximum epochs: 164
     - learning rate
 

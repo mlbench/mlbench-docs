@@ -208,6 +208,12 @@ with `NVIDIA® Tesla® K80` GPUs used for GPU training.
     :scale: 48
     :align: center
 
+* This figure shows the time spent in compute and communication for the PyTorch GPU implementation on 1, 2, 4, 8 and 16 workers.
+
+.. image:: images/scaling-comm-compute-gpu.png
+    :scale: 26
+    :align: center
+
 
 
 * The next figure compares the cost of experiment. Note that a regular `n1-standard-4` instance costs $0.19 per hour and

@@ -5,12 +5,66 @@ Installation
 
 Make sure to read :doc:`prerequisites` before installing mlbench.
 
-All guides assume you have checked out the `mlbench-helm <https://github.com/mlbench/mlbench-helm>`__ github repository and have a terminal open in the checked-out ``mlbench-helm`` directory.
+Automated Setup
+---------------
+
+MLBench can be installed automatically using the MLBench CLI.
+
+Install the CLI:
+
+.. code-block:: bash
+
+   $ pip install mlbench-core
+
+
+Then you can create a cluster by running:
+
+.. code-block:: bash
+
+   $ mlbench create-cluster gcloud 3 my-cluster
+   [...]
+   MLBench successfully deployed
+
+Which creates a cluster called ``my-cluster-3`` with 3 nodes (See ``mlbench create-cluster gcloud --help`` for more options).
+
+Once created, you can run experiments with:
+
+.. code-block:: bash
+
+   $ mlbench run my-run 2
+
+   Benchmark:
+
+   [0] PyTorch Cifar-10 ResNet-20 Open-MPI
+   [1] PyTorch Cifar-10 ResNet-20 Open-MPI (SCaling LR)
+   [2] PyTorch Linear Logistic Regrssion Open-MPI
+   [3] Tensorflow Cifar-10 ResNet-20 Open-MPI
+   [4] Custom Image
+
+   Selection [0]: 1
+
+   [...]
+
+   Run started with name my-run-2
+
+See ``mlbench run --help`` for more options.
+
+You can access the dashboard with ``mlbench get-dashboard-url``.
+
+To see the state of the experiment, run ``mlbench status my-run-2``.
+
+To download the results of the experiment, run ``mlbench download my-run-2``.
+
+Don't forget to delete the cluster once you're done by running ``mlbench delete-cluster gcloud my-cluster-3``
+
+Manual Setup
+------------
+The manual setup assumes you have checked out the `mlbench-helm <https://github.com/mlbench/mlbench-helm>`__ github repository and have a terminal open in the checked-out ``mlbench-helm`` directory.
 
 .. _google-cloud-setup:
 
 Google Cloud and Cluster Setup
-------------------------------
+""""""""""""""""""""""""""""""
 
 This project provides a script to make all the Google Cloud and Cluster setup. In order to do so, please run the following commands:
 
@@ -42,7 +96,7 @@ For general information on the available commands, please run:
 .. _helm-charts:
 
 Helm Chart values
------------------
+"""""""""""""""""
 
 Since every Kubernetes is different, there are no reasonable defaults for some values, so the following properties have to be set.
 You can save them in a yaml file of your chosing. This guide will assume you saved them in `myvalues.yaml`. For a reference file for all configurable values, you can copy the `values.yaml` file to `myvalues.yaml`.
@@ -77,8 +131,8 @@ You can save them in a yaml file of your chosing. This guide will assume you sav
 .. note::
    The GCE persistent disk will be mounted to `/datasets/` directory on each worker.
 
-Basic Install
--------------
+Helm Install
+""""""""""""
 
 Set the :ref:`helm-charts`
 
@@ -113,7 +167,7 @@ In ``values.yaml``, one can optionally install Kubernetes plugins by turning on/
 - ``nvidiaDevicePlugin.enabled``: If true, install the `nvidia device plugin <https://github.com/NVIDIA/k8s-device-plugin>`_.
 
 Google Cloud / Google Kubernetes Engine
----------------------------------------
+"""""""""""""""""""""""""""""""""""""""
 
 Set the :ref:`helm-charts`
 
@@ -150,7 +204,7 @@ To access mlbench, run these commands and open the URL that is returned (**Note*
 
 
 Minikube
---------
+""""""""
 
 Minikube allows running a single-node Kubernetes cluster inside a VM on your laptop, for users looking to try out Kubernetes or to develop with it.
 
@@ -196,7 +250,7 @@ Now the mlbench dashboard should be available at :code:`http://${NODE_IP}:${NODE
 
 
 Docker-in-Docker (DIND)
------------------------
+"""""""""""""""""""""""
 
 Docker-in-Docker allows simulating multiple nodes locally on a single machine. This is useful for development.
 

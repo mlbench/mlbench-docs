@@ -212,6 +212,14 @@ Installing mlbench to `minikube <https://github.com/kubernetes/minikube>`_.
 
 Set the :ref:`helm-charts`
 
+.. important::
+   If you are using Kubernetes version 1.16 or higher you will need to to add the following line to `/etc/kubernetes/manifest/kube-apiserver.yaml`
+
+   .. code-block:: bash
+
+      --runtime-config=apps/v1beta1=true,apps/v1beta2=true,extensions/v1beta1/daemonsets=true,extensions/v1beta1/deployments=true,extensions/v1beta1/replicasets=true,extensions/v1beta1/networkpolicies=true,extensions/v1beta1/podsecuritypolicies=true
+
+
 Start minikube cluster
 
 .. code-block:: bash

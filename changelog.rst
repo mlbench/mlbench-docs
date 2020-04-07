@@ -27,11 +27,134 @@ MLBench Dashboard
 - Added Download of Task Goals
 - Fixed some performance issues
 
+v2.3.2
+^^^^^^
+
 MLBench Core
 """"""""""""
 
-[v2.0.0](https://github.com/mlbench/mlbench-core/tree/v2.0.0 (2019-06-13)
--------------------------------------------------------------------------
+`v2.3.2 <https://github.com/mlbench/mlbench-core/tree/v2.3.2>`__ (2020-04-07)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v2.3.1...v2.3.2>`__
+
+**Implemented enhancements:**
+
+-  Add NCCL & GLOO Backend support
+   `#49 <https://github.com/mlbench/mlbench-core/issues/49>`__
+-  Add NCCL & GLOO Backend support
+   `#47 <https://github.com/mlbench/mlbench-core/pull/47>`__
+   (`giorgiosav <https://github.com/giorgiosav>`__)
+
+**Fixed bugs:**
+
+-  math ValueError with 1-node cluster
+   `#38 <https://github.com/mlbench/mlbench-core/issues/38>`__
+
+**Merged pull requests:**
+
+-  num\_workers fix
+   `#51 <https://github.com/mlbench/mlbench-core/pull/51>`__
+   (`giorgiosav <https://github.com/giorgiosav>`__)
+-  Adds centralized Adam implementation
+   `#41 <https://github.com/mlbench/mlbench-core/pull/41>`__
+   (`mmilenkoski <https://github.com/mmilenkoski>`__)
+
+v2.3.1
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`2.3.1 <https://github.com/mlbench/mlbench-core/tree/2.3.1>`__ (2020-03-09)
+---------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v2.3.0...2.3.1>`__
+
+**Implemented enhancements:**
+
+-  Customize Communication Scheme For
+   Sparsified/Quantizatized/Decentralized scenarios
+   `#12 <https://github.com/mlbench/mlbench-core/issues/12>`__
+
+v2.3.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v2.3.0 <https://github.com/mlbench/mlbench-core/tree/v2.3.0>`__ (2019-12-23)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v2.2.1...v2.3.0>`__
+
+v2.2.1
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v2.2.1 <https://github.com/mlbench/mlbench-core/tree/v2.2.1>`__ (2019-12-16)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v2.2.0...v2.2.1>`__
+
+v2.2.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v2.2.0 <https://github.com/mlbench/mlbench-core/tree/v2.2.0>`__ (2019-11-11)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v2.1.0...v2.1.1>`__
+
+**Implemented enhancements:** - ``initialize_backends`` can now be
+called as context manager - Improved CLI to run multiple runs in
+parallel
+
+v2.1.1
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v2.1.1 <https://github.com/mlbench/mlbench-core/tree/v2.1.1>`__ (2019-11-11)
+-----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v2.1.0...v2.1.1>`__
+
+v2.1.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v2.1.0 <https://github.com/mlbench/mlbench-core/tree/v2.1.0>`__ (2019-11-4)
+----------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/mlbench/mlbench-core/compare/v2.0.0...v2.1.0>`__
+
+**Implemented enhancements:**
+
+-  Added CLI for MLBench runs
+
+v2.0.0
+^^^^^^
+
+MLBench Core
+""""""""""""
+
+`v2.0.0 <https://github.com/mlbench/mlbench-core/tree/v2.0.0>`__ (2019-06-13)
+-----------------------------------------------------------------------------
 
 `Full
 Changelog <https://github.com/mlbench/mlbench-core/compare/v1.4.4...v2.0.0>`__

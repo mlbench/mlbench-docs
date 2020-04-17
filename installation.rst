@@ -270,7 +270,6 @@ Docker-in-Docker allows simulating multiple nodes locally on a single machine. T
    - You can find a guide `here <https://docs.docker.com/registry/deploying/#deploy-your-registry-using-a-compose-file>`__.
    - `This page <https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/>`_ details setting up an image pull secret.
    - `This <https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account>`_ details adding an image pull secret to a kubernetes service account.
-   - You can use ``dind-proxy.sh`` in the mlbench repository to forward the registry port (5000) to kubernetes DIND.
 
 Download the kubeadm-dind-cluster script.
 
@@ -295,10 +294,6 @@ Now we can start the local cluster with
 
 
 This might take a couple of minutes.
-
-.. hint::
-   If you're using a local docker registry, run ``dind-proxy.sh`` after the previous step.
-
 
 
 Install ``helm`` (See :doc:`prerequisites`) and set the :ref:`helm-charts`.

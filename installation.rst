@@ -120,7 +120,7 @@ You can save them in a yaml file of your chosing. This guide will assume you sav
 
 .. Caution::
    If you set ``workers``, ``cpu`` or ``gpu`` higher than available in your cluster, Kubernetes will not be able to allocate nodes to mlbench and the deployment will hang indefinitely, without throwing an exception.
-   Kubernetes will just wait until nodes that fit the requirements become available. So make sure your cluster actually has the requirements avilable that you requested.
+   Kubernetes will just wait until nodes that fit the requirements become available. So make sure your cluster actually has the requirements available that you requested.
 
 .. note::
    To use ``gpu`` in the cluster, the `nvidia device plugin <https://github.com/NVIDIA/k8s-device-plugin>`_ should be installed. See :ref:`plugins` for details

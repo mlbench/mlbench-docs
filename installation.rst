@@ -255,82 +255,49 @@ Now the mlbench dashboard should be available at :code:`http://${NODE_IP}:${NODE
       $ ssh -i ${MINIKUBE_HOME}/.minikube/machines/minikube/id_rsa -N -f -L localhost:${NODE_PORT}:${NODE_IP}:${NODE_PORT} docker@$(minikube ip)
 
   where :code:`$MINIKUBE_HOME` is by default :code:`$HOME`. One can view mlbench dashboard at :code:`http://localhost:${NODE_PORT}`
+  
+  
+Kubernetes-in-Docker (KIND)
+"""""""""""""""""""""""""""
 
+Kubernetes-in-Docker allows simulating multiple nodes locally on a single machine. This approach should be used only for local development and testing. It is not a recommended way to measure benchmark results. 
 
-Docker-in-Docker (DIND)
-"""""""""""""""""""""""
+To use KIND, you need to setup a local registry and start a KIND server. We provide the script ``kind-with-registry.sh`` that can be used to start a local registry and a local cluster with one master and two worker nodes. 
 
-Docker-in-Docker allows simulating multiple nodes locally on a single machine. This is useful for development.
+In order to push an image to the local registry you need to follow the procedure below. We use the image ``mlbench/pytorch-cifar10-resnet-scaling:2.3.0`` for illustration, but you can use any image of your choice.
 
-.. hint::
-   For development purposes, it makes sense to use a local docker registry as well with DIND.
-
-   Describing how to set up a local registry would be too long for this guide, so here are some pointers:
-
-   - You can find a guide `here <https://docs.docker.com/registry/deploying/#deploy-your-registry-using-a-compose-file>`__.
-   - `This page <https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/>`_ details setting up an image pull secret.
-   - `This <https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account>`_ details adding an image pull secret to a kubernetes service account.
-
-Download the kubeadm-dind-cluster script.
+1. Pull (or build) an image on your local machine:
 
 .. code-block:: bash
 
-   $ wget https://cdn.rawgit.com/kubernetes-sigs/kubeadm-dind-cluster/master/fixed/dind-cluster-v1.11.sh
-   $ chmod +x dind-cluster-v1.11.sh
-
-
-For networking to work in DIND, we need to set a `CNI Plugin <https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/>`_. In our experience, ``weave`` works well with DIND.
+      $ docker pull mlbench/pytorch-cifar10-resnet-scaling:2.3.0
+   
+2. Tag the image to use the local registry:
 
 .. code-block:: bash
 
-   $ export CNI_PLUGIN=weave
+      $ docker tag mlbench/pytorch-cifar10-resnet-scaling:2.3.0 localhost:5000/pytorch-cifar10-resnet-scaling:2.3.0
+      
+3. Push the image to the local registry 
 
+.. code-block:: bash
 
-Now we can start the local cluster with
+      $ docker push localhost:5000/pytorch-cifar10-resnet-scaling:2.3.0
+
+4. Now you can use the image as a custom image when starting a run on your cluster. Please make sure to specify the new tag of the image (``localhost:5000/pytorch-cifar10-resnet-scaling:2.3.0`` in the running example).
+
+Next, you need to install ``helm`` (See :doc:`prerequisites`) and set the :ref:`helm-charts`.
+
+Finally, to install mlbench on your local cluster run the following command (you can replace ``rel`` with a release name of your choice)
 
 .. code-block:: bash
 
-   $ ./dind-cluster-v1.11.sh up
+   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900s --install rel .
+   [...]
+   NOTES:
+   1. Get the application URL by running these commands:
+      export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services rel-mlbench-master)
+      export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+      echo http://$NODE_IP:$NODE_PORT
 
-
-This might take a couple of minutes.
-
-
-Install ``helm`` (See :doc:`prerequisites`) and set the :ref:`helm-charts`.
-
-.. hint::
-   For a local registry, make sure you have an ``imagePullSecret`` added to the kubernetes serviceaccount and set the repository and secret in the ``values.yaml`` file (``regcred`` in this example):
-
-   .. code-block:: yaml
-
-      master:
-        imagePullSecret: regcred
-
-        image:
-          repository: localhost:5000/mlbench_master
-          tag: latest
-          pullPolicy: Always
-
-
-      worker:
-        imagePullSecret: regcred
-
-        image:
-          repository: localhost:5000/mlbench_worker
-          tag: latest
-          pullPolicy: Always
-
-Install mlbench (Replace ``${RELEASE_NAME}`` with a name of your choice):
-
-.. code-block:: bash
-   :emphasize-lines: 5,6,7
-
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install rel .
-     [...]
-     NOTES:
-     1. Get the application URL by running these commands:
-        export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services rel-mlbench-master)
-        export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-        echo http://$NODE_IP:$NODE_PORT
-
-Run the 3 commands printed by the last command. This outputs the URL the Dashboard is accessible at.
+Run the 3 commands printed by the last command. The third command will output the URL where you can access the MLBench Dashboard. From there, you can start and monitor runs on your local cluster. 

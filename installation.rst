@@ -260,7 +260,7 @@ Now the mlbench dashboard should be available at :code:`http://${NODE_IP}:${NODE
 Kubernetes-in-Docker (KIND)
 """""""""""""""""""""""""""
 
-Kubernetes-in-Docker allows simulating multiple nodes locally on a single machine. This is useful for development.
+Kubernetes-in-Docker allows simulating multiple nodes locally on a single machine. This approach should be used only for local development and testing. It is not a recommended way to measure benchmark results. 
 
 To use KIND, you need to setup a local registry and start a KIND server. We provide the script ``kind-with-registry.sh`` that can be used to start a local registry and a local cluster with one master and two worker nodes. 
 

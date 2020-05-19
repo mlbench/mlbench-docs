@@ -12,6 +12,19 @@ Benchmark Metrics
 
 The two basic metrics for comparison are `Accuracy after Time` and `Time to Accuracy` (where accuracy will be test and/or training accuracy)
 
+The variable dimensions are:
+
+- Algorithm
+  - limited number of prescribed standard algorithms, according to strict reference implementations provided
+- Hardware
+  - GPU
+  - CPU(s)
+  - Memory
+- Scalability
+  - Number of workers
+- Network
+  - Impact of bandwidth and latency
+
 
 Accuracy after Time
 ###################

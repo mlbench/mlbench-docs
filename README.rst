@@ -47,7 +47,7 @@ MLBench consists of 5 Github repositories:
 * Documentation: http://github.com/mlbench/mlbench-docs
 * Helm Charts for Kubernetes: http://github.com/mlbench/mlbench-helm
 * Python Core Library: http://github.com/mlbench/mlbench-core
-* Closed-Division Benchmark Implementations: http://github.com/mlbench/mlbench-benchmarks
+* Benchmark Implementations: http://github.com/mlbench/mlbench-benchmarks
 * Dashboard: http://github.com/mlbench/mlbench-dashboard
 
 

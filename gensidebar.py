@@ -72,6 +72,7 @@ def generate_sidebar(conf, conf_api):
     write('Installation', 'installation')
     write("Component Overview", 'overview')
     write('Benchmarking Tasks', 'benchmark-tasks')
+    write('Tutorials', 'tutorials')
     endl()
 
     toctree('Components')

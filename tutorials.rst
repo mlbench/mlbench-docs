@@ -6,13 +6,14 @@ Tutorials
 
 Also check out our Blog_ for good tips and the latest news!
 
-Adding an existing Pytorch model to an MLBench task
----------------------------------------------------
+Adding an existing PyTorch training script into MLbench
+----------------------------------------------------------
 
 In this tutorial, we will go through the process of adapting existing distributed PyTorch code to work with the MLBench framework. This allows you to run your models in the MLBench environment and easily compare them
 with our reference implementations as baselines to see how well your code performs.
 
-MLBench is designed to easily be used with third-party models, allowing for quick and fair comparisons and saving all of the hassle that's needed to implement your own baselines for comparison.
+MLBench is designed to easily be used with third-party models, allowing for quick and fair comparisons by standardizing the data distribution, evaluation dataset and providing evaluation code.
+It saves all of the hassle that's needed to implement your own baselines for comparison.
 
 We will adapt the code from the official `PyTorch distributed tutorial <https://pytorch.org/tutorials/intermediate/dist_tuto.html>`_ to run in MLBench. If you're unfamiliar with that tutorial, it might be worth giving it a quick look so you know what we're working with.
 
@@ -86,7 +87,11 @@ Next, we need to change the signature of the ``run`` method to add the ``run_id`
     def run(rank, size, run_id):
 
 
-At this point, the script could technically already run in MLBench. But so far it would not report back to the Dashboard and you wouldn't be able to see stats during training. So let's add some reporting functionality.
+At this point, the script could technically already run in MLBench. 
+But so far it would not report back to the Dashboard and you wouldn't 
+be able to see stats during training. Even if you are not using the 
+Dashboard, the output files with the reported results would not 
+contain any of the intermediate training data. So let's add some reporting functionality.
 
 The PyTorch script reports loss to ``stdout``, but we can easily report the loss to MLBench as well. First we need to import the relevant MLBench functionality by adding the following line to the imports at the top of the file:
 
@@ -98,7 +103,9 @@ The PyTorch script reports loss to ``stdout``, but we can easily report the loss
     from mlbench_core.evaluation.pytorch.metrics import TopKAccuracy
     from mlbench_core.controlflow.pytorch import validation_round
 
-Then we can simply create a ``Tracker`` object and use it to report the loss and add metrics (``TopKAccuracy``) to track. We add code to record the timing of different steps with ``tracker.record_batch_step()``.
+``task1_time_to_accuracy_goal`` measures the time taken to reach 80% accuracy.
+
+After this we can simply create a ``Tracker`` object and use it to report the loss and add metrics (``TopKAccuracy``) to track. We add code to record the timing of different steps with ``tracker.record_batch_step()``.
 We have to tell the tracker that we're in the training loop by calling ``tracker.train()`` and that the epoch is done by calling ``tracker.epoch_end()``. The loss is recorded with ``tracker.record_loss()``.
 
 .. code-block:: python
@@ -110,58 +117,58 @@ We have to tell the tracker that we're in the training loop by calling ``tracker
         train_set, bsz = partition_dataset()
         model = Net()
         optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
-        metrics = [
+        metrics = [                                     # Add metrics to gather
             TopKAccuracy(topk=1),
             TopKAccuracy(topk=5)
         ]
         loss_func = nn.NLLLoss()
 
-        tracker = Tracker(metrics, run_id, rank)
+        tracker = Tracker(metrics, run_id, rank)        # Instantiate a Tracker
 
         num_batches = ceil(len(train_set.dataset) / float(bsz))
 
-        tracker.start()
+        tracker.start()                                 # Start the tracker
 
         for epoch in range(10):
-            tracker.train()
+            tracker.train()                             # Record training start
 
             epoch_loss = 0.0
             for data, target in train_set:
-                tracker.batch_start()
+                tracker.batch_start()                   # Record batch start
 
                 optimizer.zero_grad()
                 output = model(data)
 
-                tracker.record_batch_step('forward')
+                tracker.record_batch_step('forward')    # Record batch forward step
 
                 loss = loss_func(output, target)
                 epoch_loss += loss.data.item()
 
-                tracker.record_batch_step('loss')
+                tracker.record_batch_step('loss')       # Record batch loss step
 
                 loss.backward()
 
-                tracker.record_batch_step('backward')
+                tracker.record_batch_step('backward')   # Record batch backward step
 
                 average_gradients(model)
                 optimizer.step()
 
-                tracker.batch_end()
+                tracker.batch_end()                     # Record batch end
 
             tracker.record_loss(epoch_loss, num_batches, log_to_api=True)
 
             logging.debug('Rank %s, epoch %s: %s',
                         dist.get_rank(), epoch,
-                        epoch_loss / num_batches)
+                        epoch_loss / num_batches)       # Print to stderr
 
-            tracker.epoch_end()
+            tracker.epoch_end()                         # Record epoch end
 
-            if tracker.goal_reached:
+            if tracker.goal_reached:                    # Goal reached
                 logging.debug("Goal Reached!")
                 return
 
 
-That's it. Now the training will report the loss of each worker back to the Dashboard and show it in a nice Graph.
+That's it. Now the training will report the loss of each worker back to the Dashboard (and the output results files) and show it in a nice Graph.
 
 For the official tasks, we also need to report validation stats to the tracker and use the offical validation code. Rename the current ``partition_dataset()`` method to ``partition_dataset_train``
 and add a new partition method to load the validation set:
@@ -188,7 +195,8 @@ and add a new partition method to load the validation set:
             partition, batch_size=bsz, shuffle=True)
         return val_set, bsz
 
-Then load the validation set and add the goal for the official task (The Task 1a goal is used for illustration purposes in thsi example):
+Then load the validation set and add the goal for the official task (The `Task 1a goal <https://mlbench.readthedocs.io/en/latest/benchmark-tasks.html#a-image-classification-resnet-cifar-10>`_
+is used for illustration purposes in thsi example):
 
 .. code-block:: python
     :linenos:
@@ -274,7 +282,7 @@ In order for Kubernetes to access the image, you have to build and upload it to 
     $ docker build -t mlbench/pytorch-tutorial:latest mlbench-pytorch-tutorial/
     $ docker push mlbench/pytorch-tutorial:latest
 
-The image is now built and available fur running in MLBench
+The image is now built and available for running in MLBench.
 
 Running the code in MLBench
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -312,8 +320,18 @@ set the number of workers on which we want to execute our run.
     :align: center
 
 Now we're all set to start our experiment. Hit ``Add Run`` and that's it. You just ran a custom model on MLBench.
+If you are only running from the command line, you can execute:
 
-You should see a graph of the training loss of each worker, along with the combined ``stdout`` and ``stderr`` of all workers.
+.. code-block:: shell
+
+    mlbench run custom-pytorch-run 2
+
+When prompted, choose ``Custom Image`` and enter the image and execution command.
+
+If you are using the Dashboard, you should see a graph of the training loss of each worker, along with the combined ``stdout`` and ``stderr`` of all workers.
+If you are running from the command line, you will see these printed to your terminal 
+and will have access to the training data and results once the run is finished 
+(check our tutorial :ref:`cmdline-tutorial` for more information).
 
 .. <a href="{{ site.baseurl }}public/images/pytorch-tutorial-result.png" data-lightbox="Pytorch_Tutorial_Result" data-title="Result of the Tutorial">
 ..  <img src="{{ site.baseurl }}public/images/pytorch-tutorial-result.png" alt="Result of the Tutorial" style="max-width:80%;"/>
@@ -323,13 +341,14 @@ You should see a graph of the training loss of each worker, along with the combi
     :align: center
 
 
+.. _cmdline-tutorial:
 
 Using the MLBench Command-Line Interface
 -----------------------------------------
 
 In this tutorial we'll introduce the CLI and show you how easy it is to get it up and running.
 
-**Please beware any costs that might be incurred by running this tutorial on the Google cloud. Usually costs should only be on the order of 5-10USD. We don't take any responsibility costs incurred**
+**Please beware any costs that might be incurred by running this tutorial on the Google cloud. Usually costs should only be on the order of 5-10USD. We don't take any responsibility for the costs incurred**
 
 Install the `mlbench-core <https://github.com/mlbench/mlbench-core/tree/master>`_ python package by running:
 
@@ -339,6 +358,7 @@ Install the `mlbench-core <https://github.com/mlbench/mlbench-core/tree/master>`
 
 After installation, mlbench is usable by calling the ``mlbench`` command.
 
+MLBench supports multiple clouds, but for the purposes of this tutorial we will focus on Google Cloud. 
 To create a new Google cloud cluster, simply run (this might take a couple of minutes):
 
 .. code-block:: shell

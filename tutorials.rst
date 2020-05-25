@@ -87,11 +87,11 @@ Next, we need to change the signature of the ``run`` method to add the ``run_id`
     def run(rank, size, run_id):
 
 
-At this point, the script could technically already run in MLBench. 
-But so far it would not report back to the Dashboard and you wouldn't 
-be able to see stats during training. Even if you are not using the 
-Dashboard, the output files with the reported results would not 
-contain any of the intermediate training data. So let's add some reporting functionality.
+At this point, the script could technically already run in MLBench.
+However, you would not be able to see any reported results or intermediate 
+stats during training. Results are shown either in the Dashboard (where 
+you can see them in real time) or can be downloaded at any time during the 
+run from the command line. So let's add some reporting functionality.
 
 The PyTorch script reports loss to ``stdout``, but we can easily report the loss to MLBench as well. First we need to import the relevant MLBench functionality by adding the following line to the imports at the top of the file:
 
@@ -168,7 +168,8 @@ We have to tell the tracker that we're in the training loop by calling ``tracker
                 return
 
 
-That's it. Now the training will report the loss of each worker back to the Dashboard (and the output results files) and show it in a nice Graph.
+That's it. Now the training will report the loss of each worker back to the Dashboard and the output result files. 
+On the Dashboard, you will also see a nice graph showing this data.
 
 For the official tasks, we also need to report validation stats to the tracker and use the offical validation code. Rename the current ``partition_dataset()`` method to ``partition_dataset_train``
 and add a new partition method to load the validation set:
@@ -330,8 +331,8 @@ When prompted, choose ``Custom Image`` and enter the image and execution command
 
 If you are using the Dashboard, you should see a graph of the training loss of each worker, along with the combined ``stdout`` and ``stderr`` of all workers.
 If you are running from the command line, you will see these printed to your terminal 
-and will have access to the training data and results once the run is finished 
-(check our tutorial :ref:`cmdline-tutorial` for more information).
+and will be able to access the training data and results using ``mlbench download``
+(check out our tutorial on :ref:`cmdline-tutorial` for more information).
 
 .. <a href="{{ site.baseurl }}public/images/pytorch-tutorial-result.png" data-lightbox="Pytorch_Tutorial_Result" data-title="Result of the Tutorial">
 ..  <img src="{{ site.baseurl }}public/images/pytorch-tutorial-result.png" alt="Result of the Tutorial" style="max-width:80%;"/>

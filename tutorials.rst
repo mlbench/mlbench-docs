@@ -331,7 +331,7 @@ When prompted, choose ``Custom Image`` and enter the image and execution command
 
 If you are using the Dashboard, you should see a graph of the training loss of each worker, along with the combined ``stdout`` and ``stderr`` of all workers.
 If you are running from the command line, you will see these printed to your terminal 
-and will be able to access the training data and results using ``mlbench download``
+and will be able to access the training data and results using ``mlbench download <run_name>``
 (check out our tutorial on :ref:`cmdline-tutorial` for more information).
 
 .. <a href="{{ site.baseurl }}public/images/pytorch-tutorial-result.png" data-lightbox="Pytorch_Tutorial_Result" data-title="Result of the Tutorial">

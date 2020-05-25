@@ -279,7 +279,7 @@ In order for Kubernetes to access the image, you have to build and upload it to 
 .. code-block:: shell
 
     $ docker login
-    $ docker build -t mlbench/pytorch-tutorial:latest mlbench-pytorch-tutorial/
+    $ docker build -t <user|organisation>/<name>:latest mlbench-pytorch-tutorial/
     $ docker push mlbench/pytorch-tutorial:latest
 
 The image is now built and available for running in MLBench.
@@ -469,7 +469,6 @@ you also need to delete it by passing the same flag and argument to ``mlbench de
 
     # delete cluster
     $ mlbench delete-cluster gcloud -z europe-west2-b my-cluster-3
-
 
 
 

@@ -110,9 +110,7 @@ Image classification is one of the most important problems in computer vision an
       + scaling and warmup: apply ``linear scaling rule`` mentioned in :cite:`goyal2017accurate`. The learning rate per worker is scaled from
         :math:`\eta \times b` to :math:`\eta \times b \times k` within the first 5 epochs.
 
-    - momentum: 0.9
-    - nesterov: True
-    - weight decay: 0.0001
+    - optimizer: CentralizedSGD(momentum=0.9, nesterov=True, weight_decay=1e-4, dampening=0, by_layer=False)
 
     Besides, in each round workers access disjoint set of datapoints.
 
@@ -168,9 +166,9 @@ TODO
             8                 700
         16, 32, 64        800
         ==========     ===============
-    - momentum: 0
-    - weight decay: 0
-    - regularization rate :math:`= 0.0000025`
+
+    - optimizer: CentralizedSGD(momentum=0, nesterov=False, weight_decay=0, dampening=0, by_layer=False)
+    - regularization rate: :math:`L1=0, L2 = 0.0000025`
 
 .. [1]  Here is how we select this value:
         We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size
@@ -200,7 +198,7 @@ TODO
 #####################
 (TODO)
 
-3b. Translation EN-DE (GNMT, WMT14)
+3b. Translation EN-DE (LSTM, WMT14)
 ###################################
 (TODO)
 
@@ -218,12 +216,13 @@ TODO
 
 #. **Dataset**
     The `WMT-17 <http://www.statmt.org/wmt17/>`_
-    dataset containing a set translated sentences from multiple languages.
+    dataset containing a set of translated sentences from multiple languages.
     We exclusively use English-German translation from this dataset.
 
 
 #. **Training Algorithm**
-    We use standard Adam as the optimizer (that is distributed Adam with synchronous all-reduce communication before each update step).
+    We use Distributed Adam as the optimizer. Before each weight update, gradients on all workers are average using an `all_reduce` operation.
+    That way, all workers have the same gradients and hence the same weight updates.
     However, since the data is quite large, weight updates don't happen for all batches. Instead, the gradients are aggregated
     for a certain number of batches. For example, when using 2 workers, we update every 8 batches (for 4 workers, it would be 4 batches).
     We call this parameter `update frequency`.
@@ -242,8 +241,7 @@ TODO
       + scaling and warmup: We use 1000 warmup steps, where the learning rate is linearly increased from
         `initial_learning_rate` to `base_learning_rate`
 
-    - betas: (0.9, 0.98)
-    - eps: 1e-9
+    - optimizer: Adam(betas=(0.9, 0.98), eps=1e-9, weight_decay=0, amsgrad=False)
     - Loss Scaling
 
       + initial scale :math:`2^{7}`
@@ -261,8 +259,13 @@ Implementation details:
 #. **Mixed Precision Training**
     In order to have faster backward and forward passes, our model's weights and gradients are cast into Float16 prior to training.
     Float32 weights are still kept in memory and used by the optimizer to update weights. We use our own `FP16Optimizer`.
-    Since Float16 has lower precision than Float32, it is necessary to have a loss scaling, that scales the loss before each backward pass.
-    This avoid having `nan/inf` in weights and gradients, due to overflows and underflows.
+    Since Float16 has lower precision than Float32, it is necessary to have a loss scaler:
+        - Start with `loss_scale = initial_scale`
+        - Before each backward pass, inflate the loss by `loss_scaling` (in `float16`) to avoid underflows
+        - Before weight update, deflate gradients by `loss_scaling` (in `float32`) to keep precision
+        - Check if gradient norm is `nan` or `inf` (in `float16`). If True, `loss_scale = loss_scale / scale_factor`.
+          If False, update weights.
+        - If after `scale_window` updates, no overflow/underflow detected, `loss_scale = loss_scale * scale_factor`
 
 #. **Selection of Framework & Systems**
     We currently only have this reference implementation in PyTorch. For the systems, kubernetes allows easy transferability of our code.
@@ -271,7 +274,7 @@ Implementation details:
 #. **Environments for Scaling Task**
     For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
     There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
-    Openmpi, NCCL or GLOO are used for communication. No accelerators are used for this task.
+    MPI, NCCL or GLOO are used for communication. No accelerators are used for this task.
 
 
 

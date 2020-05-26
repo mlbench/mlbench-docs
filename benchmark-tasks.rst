@@ -297,7 +297,7 @@ Here we present the results for scaling tasks. All results were generated on the
 #. **GPU Type**
     `NVIDIA® Tesla® K80` (12GB GDDR5, Kepler arch) GPUs used for GPU training.
 
-#. **Goal**
+#. **Metric**
     Time to Accuracy of 80% on validation set.
 
 #. **Pricing**
@@ -356,7 +356,7 @@ TODO
 #. **GPU Type**
     `NVIDIA® Tesla® K80` (12GB GDDR5, Kepler arch) GPUs used for GPU training.
 
-#. **Goal**
+#. **Metric**
     Time to Accuracy of 80% on validation set.
 
 #. **Pricing**
@@ -416,7 +416,7 @@ TODO
 #. **GPU Type**
     `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
 
-#. **Goal**
+#. **Metric**
     Time to BLEU-Score of 25.0 on test set.
 
 #. **Pricing**

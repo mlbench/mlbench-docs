@@ -260,6 +260,7 @@ Implementation details:
     In order to have faster backward and forward passes, our model's weights and gradients are cast into Float16 prior to training.
     Float32 weights are still kept in memory and used by the optimizer to update weights. We use our own `FP16Optimizer`.
     Since Float16 has lower precision than Float32, it is necessary to have a loss scaler:
+
         - Start with `loss_scale = initial_scale`
         - Before each backward pass, inflate the loss by `loss_scaling` (in `float16`) to avoid underflows
         - Before weight update, deflate gradients by `loss_scaling` (in `float32`) to keep precision

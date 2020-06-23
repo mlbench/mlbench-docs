@@ -51,8 +51,6 @@ Image classification is one of the most important problems in computer vision an
     For each version we have the network implementations
     with 20, 32, 44, and 56 layers.
 
-    TODO: only benchmark two most common architectures say (can support more, but they are not part of the official benchmark task)
-
 #. **Dataset**
     The `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_
     dataset containing a set of images used to train machine learning

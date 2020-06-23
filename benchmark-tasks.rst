@@ -1,23 +1,23 @@
 .. _benchmark-tasks:
 
-==================
-Benchmarking Tasks
-==================
+===============
+Benchmark Tasks
+===============
 
-The results of the benchmarks can be found here: benchmark-task-results_
+The results can be found here: benchmark-task-results_
 
 
 Benchmark Metrics
--------------------
+-----------------
 
-The two basic metrics for comparison are `Accuracy after Time` and `Time to Accuracy` (where accuracy will be test and/or training accuracy)
+The basic metric for comparison is `Time to Accuracy`, i.e. training time of the system until a specified target accuracy is reached (where accuracy will be test and/or training accuracy).
 
 The variable dimensions are:
 
 - Algorithm
   - limited number of prescribed standard algorithms, according to strict reference implementations provided
 - Hardware
-  - GPU
+  - GPU(s)
   - CPU(s)
   - Memory
 - Scalability
@@ -26,27 +26,12 @@ The variable dimensions are:
   - Impact of bandwidth and latency
 
 
-Accuracy after Time
-###################
-
-The system has a certain amount ot time for training (2 hours) and at the end, the accuracy of the final model is evaluated.
-The higher the better
-
-Time to Accuracy
-################
-A certain accuracy, e.g. 97% is defined for a task and the training time of the system until that accuracy is reached is measured.
-The shorter the better.
-
-.. _Deep Residual Learning for Image Recognition:
-    https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf
-
-
 Benchmark Task Descriptions
 ---------------------------
 We here provide precise descriptions of the official benchmark tasks. The task are selected to be representative of relevant machine learning workloads in both industry and in the academic community. The main goal here is a fair, reproducible and
 precise comparison of most state-of-the-art algorithms, frameworks, and hardware.
 
-For each task, we provide a reference implementation, as well as benchmark metrics and results for different systems.
+For each task, we provide a reference implementation, as well as results for different systems.
 
 1 Image Classification Tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,7 +101,6 @@ Implementation details:
 1b. Image Classification (ResNet, ImageNet)
 ###########################################
 TODO
-(again synchr SGD as main baseline)
 
 
 2 Linear Learning
@@ -264,8 +248,8 @@ Implementation details:
 
 .. _benchmark-task-results:
 
-Benchmark Task Results
-----------------------
+Benchmark Results
+-----------------
 
 Here we present the results for scaling tasks. All results were generated on the Google Cloud Kubernetes Engine.
 
@@ -413,7 +397,7 @@ TODO
 Benchmark Task Implementations
 ------------------------------
 
-For details on the available Benchmark implementations, please see :ref:`Benchmarking Implementations <mlbench-benchmarks:benchmark-implementations>` .
+For details on the available Benchmark implementations, please see :ref:`Benchmark Implementations <mlbench-benchmarks:benchmark-implementations>` .
 
 
 

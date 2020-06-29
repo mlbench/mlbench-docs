@@ -48,8 +48,7 @@ Image classification is one of the most important problems in computer vision an
     `this paper <https://arxiv.org/abs/1512.03385>`_.
     The second version (m2) is based on the ResNets defined `here
     <https://arxiv.org/abs/1603.05027>`_.
-    For each version we have the network implementations
-    with 20, 32, 44, and 56 layers.
+    For this benchmark implementation, we use 20 layer ResNet called ResNet20.
 
 #. **Dataset**
     The `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_
@@ -71,11 +70,11 @@ Image classification is one of the most important problems in computer vision an
     - maximum epochs: 164
     - learning rate
 
-      + learning rate per sample :math:`\eta` : 0.1 / 256
-      + decay: similar to `Deep Residual Learning for Image Recognition <https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf>`_, we reduce learning rate by 1/10 at the 82-th and 109-th epoch.
+      + learning rate :math:`\eta` : 0.02
+      + decay: We reduce the learning rate when a plateau in the validation loss is reached for 2 consecutive epochs
       + scaling and warmup: apply ``linear scaling rule`` mentioned in :cite:`goyal2017accurate`. The learning rate per worker is scaled from
-        :math:`\eta \times b` to :math:`\eta \times b \times k` within the first 5 epochs.
-
+        :math:`\eta` to :math:`\eta \times k` within the first :math:`log_{2}(num\_workers)`.
+      +
     - optimizer: CentralizedSGD(momentum=0.9, nesterov=True, weight_decay=1e-4, dampening=0, by_layer=False)
 
     Besides, in each round workers access disjoint set of datapoints.
@@ -91,7 +90,7 @@ Implementation details:
 
 #. **Environments for Scaling Task**
     For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
-    There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
+    There is only one worker per node; each worker uses 3 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
     Openmpi is used for communication. No accelerators are used for this task.
 
 
@@ -109,6 +108,7 @@ TODO
 
 #. **Model**
     We benchmark Logistic Regression with L2 regularization.
+
 #. **Dataset**
     The `epsilon <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html>`_ dataset
     is an artificial and dense dataset which is used for Pascal large scale learning challenge
@@ -118,32 +118,17 @@ TODO
 #. **Training Algorithm**
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
 
-    - minibatch size per worker :math:`b`: 100  [1]_
-    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`  [2]_
-        Here are the values of alpha we choose for various number of workers:
+    - number of machines :math:`k`: 2, 4, 8, 16
+    - minibatch size per worker :math:`b`: 128
+    - maximum epochs: 164
+    - learning rate
 
-        ==========     ===============
-        nodes          :math:`\alpha`
-        ==========     ===============
-            1                 200
-            2                 400
-            4                 600
-            8                 700
-        16, 32, 64        800
-        ==========     ===============
+      + learning rate :math:`\eta` : 4
+      + decay: We reduce the learning rate when a plateau in the validation loss is reached for 2 consecutive epochs
+      + scaling: The learning rate per worker is scaled from :math:`\eta` to :math:`\eta \times k` for :math:`k` workers
 
     - optimizer: CentralizedSGD(momentum=0, nesterov=False, weight_decay=0, dampening=0, by_layer=False)
     - regularization rate: :math:`L1=0, L2 = 0.0000025`
-
-.. [1]  Here is how we select this value:
-        We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size
-        that enables the trained model to reach to 89% accuracy on the validation set in less time. we use
-        80% of the dataset to train the model, and the remaining 20% is used as the validation set.
-.. [2] :math:`\alpha` is tuned for each cluster size separately. To do so, we use 80% of the dataset to train
-        the model, and the remaining 20% is used as the validation set. We do a grid search to find the best
-        value for alpha: for each value in the grid ([0.001,..,1000]), the model is trained until it reaches
-        to 89% accuracy on the validation set. Finally, we select the value that enables the model to reach
-        the target accuracy value faster.
 
 **Implementation details:**
 
@@ -152,8 +137,8 @@ TODO
 
 #. **Environments for Scaling Task**
     For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
-    There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
-    Openmpi is used for communication. No accelerators are used for this task.
+    There is only one worker per node; each worker uses 3 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
+    MPI and GLOO are used for communication. No accelerators are used for this task.
 
 
 3 Natural Language Processing
@@ -165,7 +150,83 @@ TODO
 
 3b. Translation EN-DE (LSTM, WMT16)
 ###################################
-(TODO)
+#. **Model**
+    We benchmark the `GNMT <https://arxiv.org/abs/1609.08144>`_, which follows the sequence-to-sequence learning framework,
+    and uses stacked residual LSTM connections in the encoder and decoder modules. The residual connections allow
+    for deeper stacked LSTM layers, as without residuals, the stack typically suffer from
+    vanishing/exploding gradients when too many layers are used.
+
+#. **Dataset**
+    The `WMT-16 <http://www.statmt.org/wmt16/metrics-task/>`_
+    dataset containing a set of translated sentences from multiple languages.
+    We exclusively use English-German translation from this dataset.
+
+
+#. **Training Algorithm**
+    We use Distributed Adam as the optimizer. Before each weight update, gradients on all workers are average using an `all_reduce` operation.
+    That way, all workers have the same gradients and hence the same weight updates.
+    However, since the data is quite large, weight updates don't happen for all batches. Instead, the gradients are aggregated
+    for a certain number of batches. For example, when using 2 workers, we update every 8 batches (for 4 workers, it would be 4 batches).
+    We call this parameter `update frequency`.
+
+    Also, this training algorithm uses mixed precision training (explained below).
+
+    - number of machines :math:`k`: 2, 4, 8, 16, 32, 64
+    - Batch size :math:`b`: 128 sentences
+    - update frequency :math:`f`: `max(16 // num_workers, 1)`
+    - maximum epochs: 8
+    - learning rate (Figure 1. left plot)
+
+      + initial learning rate :math:`\eta` : 0.0
+      + base learning rate :math:`\eta`: 2.0e-3, linearly increased to 4.0e-3 for 64 workers
+      + decay: We decay by :math:`0.5` after having gone through 40% of total training, and then for every 5% for maximum 4 times
+      + scaling and warmup: We use 20 warmup steps, where the learning rate is exponentially increased from
+        `initial_learning_rate` to `base_learning_rate`
+
+    - optimizer: Adam(betas=(0.9, 0.999), eps=1e-8, weight_decay=0, amsgrad=False)
+    - gradient clipping: max norm of 5.0
+    - Loss Scaling
+
+      + initial scale :math:`2^{10}`
+      + scale factor :math:`2` (dowscale and upscale)
+      + max scale :math:`2^{13}`
+      + scale window :math:`128` (steps after upscale if no overflow/underflow)
+
+
+Implementation details:
+
+#. **Data Preprocessing**
+    The data needs to be downloaded and pre-processed and tokenized using the pre-processing script
+    `mlbench_core/dataset/nlp/pytorch/wmt16/preprocess/preprocess.py` before training.
+    The pre-processed data is available on our `S3 <https://storage.googleapis.com/mlbench-datasets/translation/wmt16_en_de.tar.gz>`_
+
+#. **Mixed Precision Training**
+    In order to have faster backward and forward passes, our model's weights and gradients are cast into Float16 prior to training.
+    Float32 weights are still kept in memory and used by the optimizer to update weights. We use our own `FP16Optimizer`.
+    Since Float16 has lower precision than Float32, it is necessary to have a loss scaler:
+
+        - Start with `loss_scale = initial_scale`
+        - Before each backward pass, inflate the loss by `loss_scaling` (in `float16`) to avoid underflows
+        - Before weight update, deflate gradients by `loss_scaling` (in `float32`) to keep precision
+        - Clip gradient norm to be `grad_clip`
+        - Check if gradient norm is `nan` or `inf` (in `float16`). If True, `loss_scale = loss_scale / scale_factor`.
+          If False, update weights.
+        - If after `scale_window` updates, no overflow/underflow detected, `loss_scale = loss_scale * scale_factor`
+
+#. **Selection of Framework & Systems**
+    We currently only have this reference implementation in PyTorch. For the systems, kubernetes allows easy transferability of our code.
+    While initial results reported are from google kubernetes engine, AWS will be supported very soon.
+
+#. **Environments for Scaling Task**
+    For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
+    There is only one worker per node; each worker uses 3 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
+    MPI, NCCL or GLOO are used for communication. No accelerators are used for this task.
+
+.. figure:: images/lr_schedulers_gnmt_transformer.png
+    :scale: 15
+    :align: center
+
+    Figure 1: Learning rate scheduler for GNMT and Transformer
 
 3c. Translation EN-DE (Transformer, WMT17)
 ##########################################
@@ -239,7 +300,7 @@ Implementation details:
 
 #. **Environments for Scaling Task**
     For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
-    There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
+    There is only one worker per node; each worker uses 3 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
     MPI, NCCL or GLOO are used for communication. No accelerators are used for this task.
 
 

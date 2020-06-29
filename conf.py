@@ -17,14 +17,10 @@
 # Imports
 #
 
-import os
 import sys
-from os.path import abspath, dirname, join
+import os
 
-import docutils.nodes
-import sphinx.addnodes
-
-import gensidebar
+from os.path import abspath, join, dirname
 
 sys.path.insert(0, abspath(join(dirname(__file__))))
 
@@ -172,7 +168,13 @@ epub_exclude_files = ["search.html"]
 
 # -- Custom Document processing ----------------------------------------------
 
+import gensidebar
+
 gensidebar.generate_sidebar(globals(), "mlbench")
+
+
+import sphinx.addnodes
+import docutils.nodes
 
 
 def process_child(node):

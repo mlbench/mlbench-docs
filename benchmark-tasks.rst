@@ -33,11 +33,23 @@ precise comparison of most state-of-the-art algorithms, frameworks, and hardware
 
 For each task, we provide a reference implementation, as well as results for different systems.
 
-1 Image Classification Tasks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Task 0: Communication Backend
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1a. Image Classification (ResNet, CIFAR-10)
-###########################################
+This task consists of benchmarking the communication backends for different frameworks and operations.
+
+0.a PyTorch All-reduce
+""""""""""""""""""""""
+
+In this task, tensors of increasing size in ``np.logspace(0, 8, num=80)`` are sent between workers, 100 times for each tensor size.
+This allows for measuring and comparing the communication times for each backend for an `all-reduce` operation.
+
+
+Task 1: Image Classification
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1a. Resnet-20, CIFAR-10
+"""""""""""""""""""""""
 
 Image classification is one of the most important problems in computer vision and a classic example of supervised machine learning.
 
@@ -75,7 +87,7 @@ Image classification is one of the most important problems in computer vision an
       + scaling and warmup: apply ``linear scaling rule`` mentioned in :cite:`goyal2017accurate`. The learning rate per worker is scaled from
         :math:`\eta` to :math:`\eta \times k` within the first :math:`log_{2}(num\_workers)`.
       +
-    - optimizer: CentralizedSGD(momentum=0.9, nesterov=True, weight_decay=1e-4, dampening=0, by_layer=False)
+    - optimizer: ``CentralizedSGD(momentum=0.9, nesterov=True, weight_decay=1e-4, dampening=0, by_layer=False)``
 
     Besides, in each round workers access disjoint set of datapoints.
 
@@ -95,16 +107,16 @@ Implementation details:
 
 
 
-1b. Image Classification (ResNet, ImageNet)
-###########################################
+1b. Resnet-?, ImageNet
+""""""""""""""""""""""
 TODO
 
 
-2 Linear Learning
-~~~~~~~~~~~~~~~~~
+Task 2: Linear Learning
+^^^^^^^^^^^^^^^^^^^^^^^
 
-2a. Linear Learning (Logistic Regression, epsilon)
-##################################################
+2.a Logistic Regression, Epsilon 2008
+"""""""""""""""""""""""""""""""""""""
 
 #. **Model**
     We benchmark Logistic Regression with L2 regularization.
@@ -127,7 +139,7 @@ TODO
       + decay: We reduce the learning rate when a plateau in the validation loss is reached for 2 consecutive epochs
       + scaling: The learning rate per worker is scaled from :math:`\eta` to :math:`\eta \times k` for :math:`k` workers
 
-    - optimizer: CentralizedSGD(momentum=0, nesterov=False, weight_decay=0, dampening=0, by_layer=False)
+    - optimizer: ``CentralizedSGD(momentum=0, nesterov=False, weight_decay=0, dampening=0, by_layer=False)``
     - regularization rate: :math:`L1=0, L2 = 0.0000025`
 
 **Implementation details:**
@@ -141,15 +153,17 @@ TODO
     MPI and GLOO are used for communication. No accelerators are used for this task.
 
 
-3 Natural Language Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Task 3: Language Modelling
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3a. Language Modeling
-#####################
-(TODO)
+3a. TODO
+""""""""
 
-3b. Translation EN-DE (LSTM, WMT16)
-###################################
+Task 4: Machine Translation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+4.a LSTM, WMT16 EN-DE
+"""""""""""""""""""""
 #. **Model**
     We benchmark the `GNMT <https://arxiv.org/abs/1609.08144>`_, which follows the sequence-to-sequence learning framework,
     and uses stacked residual LSTM connections in the encoder and decoder modules. The residual connections allow
@@ -183,7 +197,7 @@ TODO
       + scaling and warmup: We use 20 warmup steps, where the learning rate is exponentially increased from
         `initial_learning_rate` to `base_learning_rate`
 
-    - optimizer: Adam(betas=(0.9, 0.999), eps=1e-8, weight_decay=0, amsgrad=False)
+    - optimizer: ``Adam(betas=(0.9, 0.999), eps=1e-8, weight_decay=0, amsgrad=False)``
     - gradient clipping: max norm of 5.0
     - Loss Scaling
 
@@ -228,8 +242,8 @@ Implementation details:
 
     Figure 1: Learning rate scheduler for GNMT and Transformer
 
-3c. Translation EN-DE (Transformer, WMT17)
-##########################################
+4.b Transformer, WMT17 EN-DE
+""""""""""""""""""""""""""""
 
 #. **Model**
     We benchmark the Transformer Model, using attention mechanisms based on the paper
@@ -259,7 +273,7 @@ Implementation details:
     - max number of tokens per mini-batch :math:`b`: 8192 (1 to 16 workers), 4096 (32 workers), 2048 (64 workers)
     - update frequency :math:`f`: `max(16 // num_workers, 1)`
     - maximum epochs: 10
-    - learning rate
+    - learning rate (Figure 1. right plot)
 
       + initial learning rate :math:`\eta` : 0.0
       + base learning rate :math:`\eta`: 1.976e-3
@@ -267,7 +281,7 @@ Implementation details:
       + scaling and warmup: We use 1000 warmup steps, where the learning rate is linearly increased from
         `initial_learning_rate` to `base_learning_rate`
 
-    - optimizer: Adam(betas=(0.9, 0.98), eps=1e-9, weight_decay=0, amsgrad=False)
+    - optimizer: ``Adam(betas=(0.9, 0.98), eps=1e-9, weight_decay=0, amsgrad=False)``
     - Loss Scaling
 
       + initial scale :math:`2^{7}`
@@ -312,13 +326,47 @@ Benchmark Results
 
 Here we present the results for scaling tasks. All results were generated on the Google Cloud Kubernetes Engine.
 
-1 Image Classification Tasks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1a. Image Classification (ResNet, CIFAR-10)
-###########################################
+Task 0: Communication Backend
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+0.a PyTorch All-reduce
+""""""""""""""""""""""
 
-#. **Framworks**
+#. **Frameworks**
+    PyTorch
+
+#. **Machine Type**
+    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
+
+#. **GPU Type**
+    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+
+#. **Pricing**
+    - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
+
+.. figure:: images/task_0a_times.png
+    :scale: 15
+    :align: center
+
+    Figure 2: Communication times for 2 workers
+
+* Figure 2 shows the communication times between 2 workers for each backend, for tensors of type ``Float32`` and ``Float16``, both on CPU and GPU.
+* This graph allows for a quantitative comparison of the different backends, and to study their advantages/disadvantages.
+* We can see that MPI behaves well for small ``Float32`` tensors, with similar performance as NCCL.
+* NCCL works better than MPI for larger tensors, and has the advantage of supporting ``Float16``, while MPI doesn't.
+* GLOO has poor performance compared to others, but has the main advantage to be the only backend supporting ``Float16`` training on CPU.
+
+
+
+Task 1: Image Classification
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+1a. Resnet-20, CIFAR-10
+"""""""""""""""""""""""
+
+#. **Frameworks**
     PyTorch and Tensorflow
 
 #. **Machine Type**
@@ -367,17 +415,17 @@ Here we present the results for scaling tasks. All results were generated on the
 
 
 
-1b. Image Classification (ResNet, ImageNet)
-###########################################
+1b. Resnet-?, ImageNet
+""""""""""""""""""""""
 TODO
 
-2 Linear Learning
-~~~~~~~~~~~~~~~~~
+Task 2: Linear Learning
+^^^^^^^^^^^^^^^^^^^^^^^
 
-2a. Linear Learning (Logistic Regression, epsilon)
-##################################################
+2.a Logistic Regression, Epsilon 2008
+"""""""""""""""""""""""""""""""""""""
 
-#. **Framworks**
+#. **Frameworks**
     PyTorch
 
 #. **Machine Type**
@@ -423,21 +471,39 @@ TODO
 .. |pic7| image:: images/communication_time_ratio.png
     :scale: 48
 
-3 Natural Language Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Task 3: Language Modelling
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3a. Language Modeling
-#####################
-(TODO)
+3a. TODO
+""""""""
 
-3b. Translation EN-DE (GNMT, WMT14)
-###################################
-(TODO)
+Task 4: Machine Translation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3c. Translation EN-DE (Transformer, WMT17)
-##########################################
+4.a LSTM, WMT16 EN-DE
+"""""""""""""""""""""
 
-#. **Framworks**
+#. **Frameworks**
+    PyTorch
+
+#. **Machine Type**
+    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
+
+#. **GPU Type**
+    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+
+#. **Metric**
+    Time to BLEU-Score of 24.0 on test set.
+
+#. **Pricing**
+    - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
+
+
+4.b Transformer, WMT17 EN-DE
+""""""""""""""""""""""""""""
+
+#. **Frameworks**
     PyTorch
 
 #. **Machine Type**
@@ -451,7 +517,7 @@ TODO
 
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
-    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $$0.11/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
 
 Benchmark Task Implementations
 ------------------------------

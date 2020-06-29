@@ -1,32 +1,23 @@
 .. _benchmark-tasks:
 
-==================
-Benchmarking Tasks
-==================
+===============
+Benchmark Tasks
+===============
 
-The results of the benchmarks can be found here: benchmark-task-results_
-
-
-Benchmark Divisions
--------------------
-
-There are two divisions of benchmarking, the closed one which is restrictive to allow fair comparisons of specific training algorithms and systems,
-and the open divisions, which allows users to run their own models and code while still providing a reasonably fair comparison.
+The results can be found here: benchmark-task-results_
 
 
-Closed Division
-~~~~~~~~~~~~~~~
+Benchmark Metrics
+-----------------
 
-The Closed Division encompasses several subcategories to compare different dimensions of distributed machine learning. We provide precise reference implementations of each algorithm, including the communication patterns, such that they can be implemented strictly comparable between different hardware and software frameworks.
+The basic metric for comparison is `Time to Accuracy`, i.e. training time of the system until a specified target accuracy is reached (where accuracy will be test and/or training accuracy).
 
-The two basic metrics for comparison are `Accuracy after Time` and `Time to Accuracy` (where accuracy will be test and/or training accuracy)
-
-Variable dimensions in this category include:
+The variable dimensions are:
 
 - Algorithm
   - limited number of prescribed standard algorithms, according to strict reference implementations provided
 - Hardware
-  - GPU
+  - GPU(s)
   - CPU(s)
   - Memory
 - Scalability
@@ -34,40 +25,20 @@ Variable dimensions in this category include:
 - Network
   - Impact of bandwidth and latency
 
-Accuracy after Time
-###################
-
-The system has a certain amount ot time for training (2 hours) and at the end, the accuracy of the final model is evaluated.
-The higher the better
-
-Time to Accuracy
-################
-A certain accuracy, e.g. 97% is defined for a task and the training time of the system until that accuracy is reached is measured.
-The shorter the better.
-
-.. _Deep Residual Learning for Image Recognition:
-    https://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/He_Deep_Residual_Learning_CVPR_2016_paper.pdf
-
-
-Open Division
-~~~~~~~~~~~~~
-The Open Division allows you to implement your own algorithms and training tricks and compare them to other implementations. There's little limit to what can be changed by you and as such, it is up to you to make sure that comparisons are fair.
-
-In this division, mlbench merely provides a platform to easily perform and measure distributed machine learning experiments in a standardized way.
-
-The Open Division is **a work in progress** and as such not yet publicly available.
-
 
 Benchmark Task Descriptions
 ---------------------------
 We here provide precise descriptions of the official benchmark tasks. The task are selected to be representative of relevant machine learning workloads in both industry and in the academic community. The main goal here is a fair, reproducible and
 precise comparison of most state-of-the-art algorithms, frameworks, and hardware.
 
-For each task, we provide a reference implementation, as well as benchmark metrics and results for different systems.
+For each task, we provide a reference implementation, as well as results for different systems.
 
+1 Image Classification Tasks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1a. Image Classification (ResNet, CIFAR-10)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################################
+
 Image classification is one of the most important problems in computer vision and a classic example of supervised machine learning.
 
 #. **Model**
@@ -79,8 +50,6 @@ Image classification is one of the most important problems in computer vision an
     <https://arxiv.org/abs/1603.05027>`_.
     For each version we have the network implementations
     with 20, 32, 44, and 56 layers.
-
-    TODO: only benchmark two most common architectures say (can support more, but they are not part of the official benchmark task)
 
 #. **Dataset**
     The `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_
@@ -95,7 +64,7 @@ Image classification is one of the most important problems in computer vision an
     The rest 50,000 images are training samples.
 
 #. **Training Algorithm**
-    We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
+    We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
 
     - number of machines :math:`k`: 2, 4, 8, 16, 32
     - minibatch size per worker :math:`b`: 128
@@ -107,9 +76,7 @@ Image classification is one of the most important problems in computer vision an
       + scaling and warmup: apply ``linear scaling rule`` mentioned in :cite:`goyal2017accurate`. The learning rate per worker is scaled from
         :math:`\eta \times b` to :math:`\eta \times b \times k` within the first 5 epochs.
 
-    - momentum: 0.9
-    - nesterov: True
-    - weight decay: 0.0001
+    - optimizer: CentralizedSGD(momentum=0.9, nesterov=True, weight_decay=1e-4, dampening=0, by_layer=False)
 
     Besides, in each round workers access disjoint set of datapoints.
 
@@ -130,13 +97,15 @@ Implementation details:
 
 
 1b. Image Classification (ResNet, ImageNet)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################################
 TODO
-(again synchr SGD as main baseline)
 
+
+2 Linear Learning
+~~~~~~~~~~~~~~~~~
 
 2a. Linear Learning (Logistic Regression, epsilon)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##################################################
 
 #. **Model**
     We benchmark Logistic Regression with L2 regularization.
@@ -147,7 +116,7 @@ TODO
     It contains 400,000 training samples and 100,000 test samples with 2000 features.
 
 #. **Training Algorithm**
-    We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication after each mini-batch).
+    We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
 
     - minibatch size per worker :math:`b`: 100  [1]_
     - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`  [2]_
@@ -162,9 +131,9 @@ TODO
             8                 700
         16, 32, 64        800
         ==========     ===============
-    - momentum: 0
-    - weight decay: 0
-    - regularization rate :math:`= 0.0000025`
+
+    - optimizer: CentralizedSGD(momentum=0, nesterov=False, weight_decay=0, dampening=0, by_layer=False)
+    - regularization rate: :math:`L1=0, L2 = 0.0000025`
 
 .. [1]  Here is how we select this value:
         We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size
@@ -187,18 +156,122 @@ TODO
     Openmpi is used for communication. No accelerators are used for this task.
 
 
+3 Natural Language Processing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3a. Language Modeling
+#####################
+(TODO)
+
+3b. Translation EN-DE (LSTM, WMT14)
+###################################
+(TODO)
+
+3c. Translation EN-DE (Transformer, WMT17)
+##########################################
+
+#. **Model**
+    We benchmark the Transformer Model, using attention mechanisms based on the paper
+    `Attention Is All You need <https://arxiv.org/abs/1706.03762>`_ that. The implementation is based on
+    a combination of NVIDIA's implementation of `fairseq <https://github.com/pytorch/fairseq>`_ 's transformer.
+    Our implementation differs from MLPerf's in one subtle way: the `FusedLayerNorm` layers are changed to native
+    torch `LayerNorm`, as its performance has increased since. Also, instead of using `FusedAdam`, we use `Adam`.
+    One part of the `MultiheadAttention` module needs a cuda extension, that makes training significantly faster than
+    torch's native `MultiheadAttention`
+
+#. **Dataset**
+    The `WMT-17 <http://www.statmt.org/wmt17/>`_
+    dataset containing a set of translated sentences from multiple languages.
+    We exclusively use English-German translation from this dataset.
+
+
+#. **Training Algorithm**
+    We use Distributed Adam as the optimizer. Before each weight update, gradients on all workers are average using an `all_reduce` operation.
+    That way, all workers have the same gradients and hence the same weight updates.
+    However, since the data is quite large, weight updates don't happen for all batches. Instead, the gradients are aggregated
+    for a certain number of batches. For example, when using 2 workers, we update every 8 batches (for 4 workers, it would be 4 batches).
+    We call this parameter `update frequency`.
+
+    Also, this training algorithm uses mixed precision training (explained below).
+
+    - number of machines :math:`k`: 2, 4, 8, 16, 32, 64
+    - max number of tokens per mini-batch :math:`b`: 8192 (1 to 16 workers), 4096 (32 workers), 2048 (64 workers)
+    - update frequency :math:`f`: `max(16 // num_workers, 1)`
+    - maximum epochs: 10
+    - learning rate
+
+      + initial learning rate :math:`\eta` : 0.0
+      + base learning rate :math:`\eta`: 1.976e-3
+      + decay: We decay by :math:`\sqrt{N}` after warmup
+      + scaling and warmup: We use 1000 warmup steps, where the learning rate is linearly increased from
+        `initial_learning_rate` to `base_learning_rate`
+
+    - optimizer: Adam(betas=(0.9, 0.98), eps=1e-9, weight_decay=0, amsgrad=False)
+    - Loss Scaling
+
+      + initial scale :math:`2^{7}`
+      + scale factor :math:`2` (dowscale and upscale)
+      + scale window :math:`2000` (steps after upscale if no overflow/underflow)
+
+
+Implementation details:
+
+#. **Data Preprocessing**
+    The data needs to be downloaded and pre-processed and tokenized using the pre-processing script
+    `mlbench_core/dataset/nlp/pytorch/wmt17/preprocess/preprocess.py` before training.
+    The pre-processed data is available on our `S3 storage <https://storage.googleapis.com/mlbench-datasets/translation/wmt17_en_de.tar.gz>`_
+
+#. **Mixed Precision Training**
+    In order to have faster backward and forward passes, our model's weights and gradients are cast into Float16 prior to training.
+    Float32 weights are still kept in memory and used by the optimizer to update weights. We use our own `FP16Optimizer`.
+    Since Float16 has lower precision than Float32, it is necessary to have a loss scaler:
+
+        - Start with `loss_scale = initial_scale`
+        - Before each backward pass, inflate the loss by `loss_scaling` (in `float16`) to avoid underflows
+        - Before weight update, deflate gradients by `loss_scaling` (in `float32`) to keep precision
+        - Check if gradient norm is `nan` or `inf` (in `float16`). If True, `loss_scale = loss_scale / scale_factor`.
+          If False, update weights.
+        - If after `scale_window` updates, no overflow/underflow detected, `loss_scale = loss_scale * scale_factor`
+
+#. **Selection of Framework & Systems**
+    We currently only have this reference implementation in PyTorch. For the systems, kubernetes allows easy transferability of our code.
+    While initial results reported are from google kubernetes engine, AWS will be supported very soon.
+
+#. **Environments for Scaling Task**
+    For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
+    There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
+    MPI, NCCL or GLOO are used for communication. No accelerators are used for this task.
+
 
 
 .. _benchmark-task-results:
 
-Benchmark Task Results
-----------------------
+Benchmark Results
+-----------------
+
+Here we present the results for scaling tasks. All results were generated on the Google Cloud Kubernetes Engine.
+
+1 Image Classification Tasks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1a. Image Classification (ResNet, CIFAR-10)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################################
 
-Here we present the results for scaling task. All results were generated on the Google Cloud Kubernetes Engine. `n1-standard-4` instances were used for training,
-with `NVIDIA® Tesla® K80` GPUs used for GPU training.
+#. **Framworks**
+    PyTorch and Tensorflow
+
+#. **Machine Type**
+    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
+
+#. **GPU Type**
+    `NVIDIA® Tesla® K80` (12GB GDDR5, Kepler arch) GPUs used for GPU training.
+
+#. **Metric**
+    Time to Accuracy of 80% on validation set.
+
+#. **Pricing**
+    - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
+    - `NVIDIA® Tesla® K80`: $0.45/hour (regular), $0.135/hour (preemptible)
 
 
 * The next figure shows the speedup in training times to 80% accuracy relative to training on one node [3]_. The baseline time for 1 worker for the PyTorch CPU implementation is
@@ -234,15 +307,31 @@ with `NVIDIA® Tesla® K80` GPUs used for GPU training.
 
 
 1b. Image Classification (ResNet, ImageNet)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################################
 TODO
 
-
+2 Linear Learning
+~~~~~~~~~~~~~~~~~
 
 2a. Linear Learning (Logistic Regression, epsilon)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##################################################
 
-Here we present the results for the scaling task.
+#. **Framworks**
+    PyTorch
+
+#. **Machine Type**
+    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
+
+#. **GPU Type**
+    `NVIDIA® Tesla® K80` (12GB GDDR5, Kepler arch) GPUs used for GPU training.
+
+#. **Metric**
+    Time to Accuracy of 80% on validation set.
+
+#. **Pricing**
+    - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
+    - `NVIDIA® Tesla® K80`: $0.45/hour (regular), $0.135/hour (preemptible)
+
 
 * First figure shows the speedup of time to accuracy, for test accuracy of 89%, as the size of the cluster increases.
   Even though initially the speedup grows with the number of nodes added to the cluster,
@@ -273,10 +362,40 @@ Here we present the results for the scaling task.
 .. |pic7| image:: images/communication_time_ratio.png
     :scale: 48
 
+3 Natural Language Processing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3a. Language Modeling
+#####################
+(TODO)
+
+3b. Translation EN-DE (GNMT, WMT14)
+###################################
+(TODO)
+
+3c. Translation EN-DE (Transformer, WMT17)
+##########################################
+
+#. **Framworks**
+    PyTorch
+
+#. **Machine Type**
+    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
+
+#. **GPU Type**
+    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+
+#. **Metric**
+    Time to BLEU-Score of 25.0 on test set.
+
+#. **Pricing**
+    - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $$0.11/hour (preemptible)
+
 Benchmark Task Implementations
 ------------------------------
 
-For details on the available Benchmark implementations, please see :ref:`Benchmarking Implementations <mlbench-benchmarks:benchmark-implementations>` .
+For details on the available Benchmark implementations, please see :ref:`Benchmark Implementations <mlbench-benchmarks:benchmark-implementations>` .
 
 
 

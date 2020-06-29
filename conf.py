@@ -59,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'MLBench'
-copyright = '2018 MLBench development team'
+copyright = '2020 MLBench development team'
 
 # TODO: detect this at
 #rtd_version = 'latest'
@@ -76,7 +76,7 @@ intersphinx_mapping = {
 # built documents.
 #
 # The short X.Y version.
-version = '2018'
+version = '2020'
 # The full version, including alpha/beta/rc tags.
 release = version
 

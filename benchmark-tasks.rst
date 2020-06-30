@@ -38,6 +38,8 @@ Task 0: Communication Backend
 
 This task consists of benchmarking the communication backends for different frameworks and operations.
 
+.. _benchmark-task-0a:
+
 0.a PyTorch All-reduce
 """"""""""""""""""""""
 
@@ -47,9 +49,11 @@ This allows for measuring and comparing the communication times for each backend
 
 Task 1: Image Classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _benchmark-task-1a:
 
 1a. Resnet-20, CIFAR-10
 """""""""""""""""""""""
+
 
 Image classification is one of the most important problems in computer vision and a classic example of supervised machine learning.
 
@@ -106,14 +110,17 @@ Implementation details:
     Openmpi is used for communication. No accelerators are used for this task.
 
 
+.. _benchmark-task-1b:
 
 1b. Resnet-?, ImageNet
 """"""""""""""""""""""
+
 TODO
 
 
 Task 2: Linear Learning
 ^^^^^^^^^^^^^^^^^^^^^^^
+.. _benchmark-task-2a:
 
 2.a Logistic Regression, Epsilon 2008
 """""""""""""""""""""""""""""""""""""
@@ -156,14 +163,20 @@ Task 2: Linear Learning
 Task 3: Language Modelling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _benchmark-task-3a:
+
 3a. TODO
 """"""""
 
 Task 4: Machine Translation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _benchmark-task-4a:
+
 4.a LSTM, WMT16 EN-DE
 """""""""""""""""""""
+
+
 #. **Model**
     We benchmark the `GNMT <https://arxiv.org/abs/1609.08144>`_, which follows the sequence-to-sequence learning framework,
     and uses stacked residual LSTM connections in the encoder and decoder modules. The residual connections allow
@@ -241,6 +254,8 @@ Implementation details:
     :align: center
 
     Figure 1: Learning rate scheduler for GNMT and Transformer
+
+.. _benchmark-task-4b:
 
 4.b Transformer, WMT17 EN-DE
 """"""""""""""""""""""""""""

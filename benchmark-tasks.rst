@@ -356,12 +356,10 @@ Task 0: Communication Backend
 #. **Frameworks**
     PyTorch
 
-#. **Machine Type**
-    - `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
-    - 3 CPUs available for pod (1 for Kubernetes management)
-
-#. **GPU Type**
-    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
 
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
@@ -391,12 +389,10 @@ Task 1: Image Classification
 #. **Frameworks**
     PyTorch and Tensorflow
 
-#. **Machine Type**
-    - `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
-    - 3 CPUs available for pod (1 for Kubernetes management)
-
-#. **GPU Type**
-    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
 
 #. **Metric**
     Time to Accuracy of 80% on validation set.
@@ -451,9 +447,9 @@ Task 2: Linear Learning
 #. **Frameworks**
     PyTorch
 
-#. **Machine Type**
-    - `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
-    - 3 CPUs available for pod (1 for Kubernetes management)
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
 
 #. **Metric**
     Time to Accuracy of 80% on validation set.
@@ -505,12 +501,10 @@ Task 4: Machine Translation
 #. **Frameworks**
     PyTorch
 
-#. **Machine Type**
-    - `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
-    - 3 CPUs available for pod (1 for Kubernetes management)
-
-#. **GPU Type**
-    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
 
 #. **Metric**
     Time to BLEU-Score of 24.0 on test set.
@@ -526,12 +520,10 @@ Task 4: Machine Translation
 #. **Frameworks**
     PyTorch
 
-#. **Machine Type**
-    - `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
-    - 3 CPUs available for pod (1 for Kubernetes management)
-
-#. **GPU Type**
-    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
 
 #. **Metric**
     Time to BLEU-Score of 25.0 on test set.

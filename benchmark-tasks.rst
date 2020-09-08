@@ -152,6 +152,15 @@ Task 2: Linear Learning
 
 **Implementation details:**
 
+#. **Data Preprocessing**
+    Dataset is pre-processed prior to training, and stored on [here](https://storage.googleapis.com/mlbench-datasets/libsvm).
+    The pre-processing script can be found under `mlbench_core/dataset/util/pytorch/libsvm.py`, and generates `.lmdb`
+    files from the original dataset. One can easily generate the used dataset by running:
+
+    .. code-block:: bash
+
+        $ python mlbench_core/dataset/util/pytorch/libsvm.py epsilon [test | train] [dest_dir]
+
 #. **Selection of Framework & Systems**
     We aim to provide the same algorithm in multiple frameworks, primarily focusing on PyTorch and Tensorflow.
     For the systems, kubernetes allows easy transferability of our code.

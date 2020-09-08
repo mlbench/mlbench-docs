@@ -33,23 +33,36 @@ precise comparison of most state-of-the-art algorithms, frameworks, and hardware
 
 For each task, we provide a reference implementation, as well as results for different systems.
 
-1 Image Classification Tasks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Task 0: Communication Backend Raw Performance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1a. Image Classification (ResNet, CIFAR-10)
-###########################################
+This task consists of benchmarking the communication backends for different frameworks and operations.
+
+.. _benchmark-task-0a:
+
+0.a All-reduce
+""""""""""""""
+
+In this task, tensors of increasing size in ``np.logspace(0, 8, num=80)`` are sent between workers, 100 times for each tensor size.
+This allows for measuring and comparing the communication times for each backend for an `all-reduce` operation.
+
+
+Task 1: Image Classification
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _benchmark-task-1a:
+
+1a. Resnet-20, CIFAR-10
+"""""""""""""""""""""""
+
 
 Image classification is one of the most important problems in computer vision and a classic example of supervised machine learning.
 
 #. **Model**
     We benchmark two model architectures of Deep Residual Networks (ResNets)
     based on prior work by He et al.
-    The first model (m1) is based on the ResNets defined in
-    `this paper <https://arxiv.org/abs/1512.03385>`_.
-    The second version (m2) is based on the ResNets defined `here
-    <https://arxiv.org/abs/1603.05027>`_.
-    For each version we have the network implementations
-    with 20, 32, 44, and 56 layers.
+    The first model (m1) is based on the ResNets defined in :cite:`DBLP:journals/corr/HeZRS15`.
+    The second version (m2) is based on the ResNets defined in :cite:`DBLP:journals/corr/HeZR016`.
+    For this benchmark implementation, we use 20 layers ResNet called ResNet-20 using the first version stated previously.
 
 #. **Dataset**
     The `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_
@@ -64,19 +77,20 @@ Image classification is one of the most important problems in computer vision an
     The rest 50,000 images are training samples.
 
 #. **Training Algorithm**
-    We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
+    We use standard synchronous SGD :cite:`DBLP:journals/corr/0002AMVSKKD16` as the optimizer (distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch update).
 
-    - number of machines :math:`k`: 2, 4, 8, 16, 32
-    - minibatch size per worker :math:`b`: 128
+    - number of machines ``k = 1, 2, 4, 8, 16, 32``
+    - minibatch size per worker ``b = 128``
     - maximum epochs: 164
     - learning rate
 
-      + learning rate per sample :math:`\eta` : 0.1 / 256
-      + decay: similar to `Deep Residual Learning for Image Recognition`_, we reduce learning rate by 1/10 at the 82-th and 109-th epoch.
-      + scaling and warmup: apply ``linear scaling rule`` mentioned in :cite:`goyal2017accurate`. The learning rate per worker is scaled from
-        :math:`\eta \times b` to :math:`\eta \times b \times k` within the first 5 epochs.
+      + learning rate :math:`\eta` : 0.02
+      + decay: We reduce the learning rate when a plateau in the validation loss is reached for 2 consecutive epochs
+      + scaling and warmup: apply ``linear scaling rule`` mentioned in :cite:`goyal2017accurate`. The learning rate is scaled from
+        :math:`\eta` to :math:`\eta \times k` within the first :math:`log_{2}(num\_workers)`.
 
-    - optimizer: CentralizedSGD(momentum=0.9, nesterov=True, weight_decay=1e-4, dampening=0, by_layer=False)
+    - optimizer: ``CentralizedSGD(momentum=0.9, nesterov=True, weight_decay=1e-4, dampening=0, by_layer=False)``
+    - loss : ``CrossEntropyLoss``
 
     Besides, in each round workers access disjoint set of datapoints.
 
@@ -84,31 +98,36 @@ Image classification is one of the most important problems in computer vision an
 Implementation details:
 
 #. **Data Preprocessing**
-    We followed the same approach as mentioned `here <https://arxiv.org/abs/1512.03385>`__.
+    We followed the same approach described in :cite:`DBLP:journals/corr/HeZRS15`.
 
 #. **Selection of Framework & Systems**
-    We aim to provide the same algorithm in multiple frameworks, primarily focussing on PyTorch and Tensorflow. For the systems, kubernetes allows easy transferability of our code. While initial results reported are from google kubernetes engine, AWS will be supported very soon.
+    We aim to provide the same algorithm in multiple frameworks, primarily focusing on PyTorch and Tensorflow.
+    For the systems, kubernetes allows easy transferability of our code.
+    While initial results reported are from google kubernetes engine, AWS will be supported very soon.
 
 #. **Environments for Scaling Task**
-    For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
-    There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
-    Openmpi is used for communication. No accelerators are used for this task.
+    We use a single process per node environment, with one GPU per process (i.e. one GPU per node).
+    The bandwidth between two nodes is around 7.5Gbit/s. ``MPI``, ``GLOO`` or ``NCCL`` are used for communication.
 
 
+.. _benchmark-task-1b:
 
-1b. Image Classification (ResNet, ImageNet)
-###########################################
+1b. Resnet-?, ImageNet
+""""""""""""""""""""""
+
 TODO
 
 
-2 Linear Learning
-~~~~~~~~~~~~~~~~~
+Task 2: Linear Learning
+^^^^^^^^^^^^^^^^^^^^^^^
+.. _benchmark-task-2a:
 
-2a. Linear Learning (Logistic Regression, epsilon)
-##################################################
+2.a Logistic Regression, Epsilon 2008
+"""""""""""""""""""""""""""""""""""""
 
 #. **Model**
     We benchmark Logistic Regression with L2 regularization.
+
 #. **Dataset**
     The `epsilon <https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html>`_ dataset
     is an artificial and dense dataset which is used for Pascal large scale learning challenge
@@ -116,63 +135,148 @@ TODO
     It contains 400,000 training samples and 100,000 test samples with 2000 features.
 
 #. **Training Algorithm**
-    We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
+    We use standard synchronous SGD :cite:`DBLP:journals/corr/0002AMVSKKD16` as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
 
-    - minibatch size per worker :math:`b`: 100  [1]_
-    - learning rate : :math:`\frac{\alpha}{\sqrt{t}}`  [2]_
-        Here are the values of alpha we choose for various number of workers:
+    - number of machines ``k = 1, 2, 4, 8, 16``
+    - minibatch size per worker ``b = 128``
+    - maximum epochs: 164
+    - learning rate
 
-        ==========     ===============
-        nodes          :math:`\alpha`
-        ==========     ===============
-            1                 200
-            2                 400
-            4                 600
-            8                 700
-        16, 32, 64        800
-        ==========     ===============
+      + learning rate :math:`\eta` : 4
+      + decay: We reduce the learning rate when a plateau in the validation loss is reached for 2 consecutive epochs
+      + scaling: The learning rate is scaled from :math:`\eta` to :math:`\eta \times k` for :math:`k` workers
 
-    - optimizer: CentralizedSGD(momentum=0, nesterov=False, weight_decay=0, dampening=0, by_layer=False)
-    - regularization rate: :math:`L1=0, L2 = 0.0000025`
-
-.. [1]  Here is how we select this value:
-        We train the model with different batch sizes ([1,..,1000]) and in the end we select the batch size
-        that enables the trained model to reach to 89% accuracy on the validation set in less time. we use
-        80% of the dataset to train the model, and the remaining 20% is used as the validation set.
-.. [2] :math:`\alpha` is tuned for each cluster size separately. To do so, we use 80% of the dataset to train
-        the model, and the remaining 20% is used as the validation set. We do a grid search to find the best
-        value for alpha: for each value in the grid ([0.001,..,1000]), the model is trained until it reaches
-        to 89% accuracy on the validation set. Finally, we select the value that enables the model to reach
-        the target accuracy value faster.
+    - optimizer: ``CentralizedSGD(momentum=0, nesterov=False, weight_decay=0, dampening=0, by_layer=False)``
+    - loss: ``BCELossRegularized`` (Binary Cross-Entropy Loss with regularization)
+    - regularization parameters: :math:`L1=0, L2 = 0.0000025`
 
 **Implementation details:**
 
+#. **Data Preprocessing**
+    Dataset is pre-processed prior to training, and stored on [here](https://storage.googleapis.com/mlbench-datasets/libsvm).
+    The pre-processing script can be found under `mlbench_core/dataset/util/pytorch/libsvm.py`, and generates `.lmdb`
+    files from the original dataset. One can easily generate the used dataset by running:
+
+    .. code-block:: bash
+
+        $ python mlbench_core/dataset/util/pytorch/libsvm.py epsilon [test | train] [dest_dir]
+
 #. **Selection of Framework & Systems**
-    While our initial reference implementation is currently PyTorch, we will aim to provide the same algorithm in more frameworks very soon, starting with Tensorflow. For the systems, kubernetes allows easy transferability of our code. While initial results reported are from google kubernetes engine, AWS will be supported very soon.
+    We aim to provide the same algorithm in multiple frameworks, primarily focusing on PyTorch and Tensorflow.
+    For the systems, kubernetes allows easy transferability of our code.
+    While initial results reported are from google kubernetes engine, AWS will be supported very soon.
 
 #. **Environments for Scaling Task**
-    For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
-    There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
-    Openmpi is used for communication. No accelerators are used for this task.
+    We use a single process per node environment, with no GPU acceleration.
+    The bandwidth between two nodes is around 7.5Gbit/s. ``MPI`` or ``GLOO`` are used for communication.
 
 
-3 Natural Language Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Task 3: Language Modelling
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3a. Language Modeling
-#####################
-(TODO)
+.. _benchmark-task-3a:
 
-3b. Translation EN-DE (LSTM, WMT14)
-###################################
-(TODO)
+3a. TODO
+""""""""
 
-3c. Translation EN-DE (Transformer, WMT17)
-##########################################
+Task 4: Machine Translation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _benchmark-task-4a:
+
+4.a LSTM, WMT16 EN-DE
+"""""""""""""""""""""
+
+
+#. **Model**
+    We benchmark the GNMT Machine Translation Model :cite:`DBLP:journals/corr/WuSCLNMKCGMKSJL16`, which follows the sequence-to-sequence learning framework,
+    and uses stacked residual LSTM connections in the encoder and decoder modules. The residual connections allow
+    for deeper stacked LSTM layers, as without residuals, the stack typically suffer from
+    vanishing/exploding gradients when too many layers are used.
+
+#. **Dataset**
+    The `WMT-16 <http://www.statmt.org/wmt16/metrics-task/>`_
+    dataset containing a set of translated sentences from multiple languages.
+    We exclusively use English-German translation from this dataset.
+
+
+#. **Training Algorithm**
+    We use Synchronous distributed Adam as the optimizer, which is similar to :cite:`DBLP:journals/corr/0002AMVSKKD16`,
+    but uses Adam's update rule:
+    Before each weight update, gradients on all workers are summed using an ``all_reduce`` operation;
+    that way, all workers share their gradients and obtain the same weight update.
+    However, since the data is quite large, weight updates don't happen for all batches. Instead, the gradients are aggregated
+    for a certain number of batches. For example, when using 2 workers, we update every 8 batches (for 4 workers, it would be 4 batches).
+    We call this parameter `update frequency`.
+
+    Also, this training algorithm uses mixed precision training (explained below).
+
+    - number of machines ``k = 1, 2, 4, 8, 16, 32``
+    - minibatch size per worker ``b = 128`` sentences
+    - update frequency ``update_freq = max(16 // num_workers, 1)``
+    - maximum epochs: 8
+    - learning rate (Figure 1. left plot)
+
+      + ``initial_learning_rate = 0.0``
+      + ``base_learning_rate = 2.0e-3``, linearly increased to 4.0e-3 for 64 workers
+      + decay: We decay by :math:`0.5` after having gone through 40% of total training, and then for every 5% for maximum 4 times
+      + scaling and warmup: We use 20 warmup steps, where the learning rate is exponentially increased from
+        ``initial_learning_rate`` to ``base_learning_rate``
+
+    - optimizer: ``Adam(betas=(0.9, 0.999), eps=1e-8, weight_decay=0, amsgrad=False)``
+    - loss: ``LabelSmoothingLoss`` (Negative Log-Likelihood with smoothing)
+    - gradient clipping: max norm of 5.0
+    - Loss Scaling
+
+      + ``initial_scale = 2**10``
+      + ``scale_factor = 2`` (downscale and upscale)
+      + ``max_scale = 2**13``
+      + ``scale_window = 128`` (steps after upscale if no overflow/underflow)
+
+
+Implementation details:
+
+#. **Data Preprocessing**
+    The data needs to be downloaded and pre-processed and tokenized using the pre-processing script
+    `mlbench_core/dataset/nlp/pytorch/wmt16/preprocess/preprocess.py` before training.
+    The pre-processed data is available on our `S3 <https://storage.googleapis.com/mlbench-datasets/translation/wmt16_en_de.tar.gz>`_
+
+#. **Mixed Precision Training**
+    In order to have faster backward and forward passes, our model's weights and gradients are cast into ``float16`` prior to training.
+    ``float32`` weights are still kept in memory and used by the optimizer to update weights. We use our own ``FP16Optimizer``.
+    Since ``float16`` has lower precision than ``float32``, it is necessary to have a loss scaler:
+
+        - Start with ``loss_scale = initial_scale``
+        - Before each backward pass, inflate the loss by ``loss_scale`` (in ``float16``) to avoid underflows
+        - Before weight update, deflate gradients by ``loss_scale`` (in ``float32``) to keep precision
+        - Clip gradient norm to be ``grad_clip``
+        - Check if gradient norm is ``nan`` or ``inf`` (in ``float16``). If True, ``loss_scale = loss_scale / scale_factor``.
+          If False, update weights.
+        - If after ``scale_window`` updates, no overflow/underflow detected, ``loss_scale = loss_scale * scale_factor``
+
+#. **Selection of Framework & Systems**
+    We currently only have this reference implementation in PyTorch. For the systems, kubernetes allows easy transferability of our code.
+    While initial results reported are from Google Kubernetes engine, AWS will be supported very soon.
+
+#. **Environments for Scaling Task**
+    We use a single process per node environment, with one GPU per process (i.e. one GPU per node).
+    The bandwidth between two nodes is around 7.5Gbit/s. ``MPI`` or ``NCCL`` are used for communication.
+
+
+.. figure:: images/lr_schedulers_gnmt_transformer.png
+    :scale: 15
+    :align: center
+
+    Figure 1: Learning rate scheduler for GNMT and Transformer
+
+.. _benchmark-task-4b:
+
+4.b Transformer, WMT17 EN-DE
+""""""""""""""""""""""""""""
 
 #. **Model**
     We benchmark the Transformer Model, using attention mechanisms based on the paper
-    `Attention Is All You need <https://arxiv.org/abs/1706.03762>`_ that. The implementation is based on
+    "Attention Is All You need" :cite:`DBLP:journals/corr/VaswaniSPUJGKP17` that. The implementation is based on
     a combination of NVIDIA's implementation of `fairseq <https://github.com/pytorch/fairseq>`_ 's transformer.
     Our implementation differs from MLPerf's in one subtle way: the `FusedLayerNorm` layers are changed to native
     torch `LayerNorm`, as its performance has increased since. Also, instead of using `FusedAdam`, we use `Adam`.
@@ -186,32 +290,35 @@ TODO
 
 
 #. **Training Algorithm**
-    We use Distributed Adam as the optimizer. Before each weight update, gradients on all workers are average using an `all_reduce` operation.
-    That way, all workers have the same gradients and hence the same weight updates.
+    We use Synchronous distributed Adam as the optimizer, which is similar to :cite:`DBLP:journals/corr/0002AMVSKKD16`,
+    but uses Adam's update rule:
+    Before each weight update, gradients on all workers are summed using an ``all_reduce`` operation and divided by ``world_size * update_frequency``;
+    that way, all workers share their gradients and obtain the same weight update.
     However, since the data is quite large, weight updates don't happen for all batches. Instead, the gradients are aggregated
     for a certain number of batches. For example, when using 2 workers, we update every 8 batches (for 4 workers, it would be 4 batches).
     We call this parameter `update frequency`.
 
     Also, this training algorithm uses mixed precision training (explained below).
 
-    - number of machines :math:`k`: 2, 4, 8, 16, 32, 64
-    - max number of tokens per mini-batch :math:`b`: 8192 (1 to 16 workers), 4096 (32 workers), 2048 (64 workers)
-    - update frequency :math:`f`: `max(16 // num_workers, 1)`
+    - number of machines ``k = 1, 2, 4, 8, 16, 32``
+    - max number of tokens per mini-batch ``b = 8192`` (1 to 16 workers), ``4096`` (32 workers), ``2048`` (64 workers)
+    - update frequency ``update_freq = max(16 // num_workers, 1)``
     - maximum epochs: 10
-    - learning rate
+    - learning rate (Figure 1. right plot)
 
-      + initial learning rate :math:`\eta` : 0.0
-      + base learning rate :math:`\eta`: 1.976e-3
+      + ``initial_learning_rate = 0.0``
+      + ``base_learning_rate = 1.976e-3``
       + decay: We decay by :math:`\sqrt{N}` after warmup
       + scaling and warmup: We use 1000 warmup steps, where the learning rate is linearly increased from
-        `initial_learning_rate` to `base_learning_rate`
+        ``initial_learning_rate`` to ``base_learning_rate``
 
-    - optimizer: Adam(betas=(0.9, 0.98), eps=1e-9, weight_decay=0, amsgrad=False)
+    - optimizer: ``Adam(betas=(0.9, 0.98), eps=1e-9, weight_decay=0, amsgrad=False)``
+    - loss: ``LabelSmoothingLoss`` (Negative Log-Likelihood with smoothing)
     - Loss Scaling
 
-      + initial scale :math:`2^{7}`
-      + scale factor :math:`2` (dowscale and upscale)
-      + scale window :math:`2000` (steps after upscale if no overflow/underflow)
+      + ``initial_scale = 2**7``
+      + ``scale_factor = 2`` (dowscale and upscale)
+      + ``scale_window = 2000`` (steps after upscale if no overflow/underflow)
 
 
 Implementation details:
@@ -222,26 +329,24 @@ Implementation details:
     The pre-processed data is available on our `S3 storage <https://storage.googleapis.com/mlbench-datasets/translation/wmt17_en_de.tar.gz>`_
 
 #. **Mixed Precision Training**
-    In order to have faster backward and forward passes, our model's weights and gradients are cast into Float16 prior to training.
-    Float32 weights are still kept in memory and used by the optimizer to update weights. We use our own `FP16Optimizer`.
-    Since Float16 has lower precision than Float32, it is necessary to have a loss scaler:
+    In order to have faster backward and forward passes, our model's weights and gradients are cast into ``float16`` prior to training.
+    ``float32`` weights are still kept in memory and used by the optimizer to update weights. We use our own `FP16Optimizer`.
+    Since ``float16`` has lower precision than ``float32``, it is necessary to have a loss scaler:
 
-        - Start with `loss_scale = initial_scale`
-        - Before each backward pass, inflate the loss by `loss_scaling` (in `float16`) to avoid underflows
-        - Before weight update, deflate gradients by `loss_scaling` (in `float32`) to keep precision
-        - Check if gradient norm is `nan` or `inf` (in `float16`). If True, `loss_scale = loss_scale / scale_factor`.
+        - Start with ``loss_scale = initial_scale``
+        - Before each backward pass, inflate the loss by ``loss_scaling`` (in ``float16``) to avoid underflows
+        - Before weight update, deflate gradients by ``loss_scaling * full_batch_size / (world_size * update_freq)`` (in ``float32``) to keep precision, where ``full_batch_size`` is the batch size over all workers (sum of number of tokens on this batch for each worker).
+        - Check if gradient norm is ``nan`` or ``inf`` (in ``float16``). If True, ``loss_scale = loss_scale / scale_factor``.
           If False, update weights.
-        - If after `scale_window` updates, no overflow/underflow detected, `loss_scale = loss_scale * scale_factor`
+        - If after ``scale_window`` updates, no overflow/underflow detected, ``loss_scale = loss_scale * scale_factor``
 
 #. **Selection of Framework & Systems**
     We currently only have this reference implementation in PyTorch. For the systems, kubernetes allows easy transferability of our code.
     While initial results reported are from google kubernetes engine, AWS will be supported very soon.
 
 #. **Environments for Scaling Task**
-    For the scaling task, we use `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ type instances with 50GB disk size.
-    There is only one worker per node; each worker uses 2.5 cpus. The bandwidth between two nodes is around 7.5Gbit/s.
-    MPI, NCCL or GLOO are used for communication. No accelerators are used for this task.
-
+    We use a single process per node environment, with one GPU per process (i.e. one GPU per node).
+    The bandwidth between two nodes is around 7.5Gbit/s. ``MPI`` or ``NCCL`` are used for communication.
 
 
 .. _benchmark-task-results:
@@ -251,27 +356,59 @@ Benchmark Results
 
 Here we present the results for scaling tasks. All results were generated on the Google Cloud Kubernetes Engine.
 
-1 Image Classification Tasks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1a. Image Classification (ResNet, CIFAR-10)
-###########################################
+Task 0: Communication Backend
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+0.a PyTorch All-reduce
+""""""""""""""""""""""
 
-#. **Framworks**
+#. **Frameworks**
+    PyTorch
+
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
+
+#. **Pricing**
+    - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
+
+.. figure:: images/task_0a_times.png
+    :scale: 15
+    :align: center
+
+    Figure 2: Communication times for 2 workers
+
+* Figure 2 shows the communication times between 2 workers for each backend, for tensors of type ``float32`` and ``float16``, both on CPU and GPU.
+* This graph allows for a quantitative comparison of the different backends, and to study their advantages/disadvantages.
+* We can see that MPI behaves well for small ``float32`` tensors, with similar performance as NCCL.
+* NCCL works better than MPI for larger tensors, and has the advantage of supporting ``float16``, while MPI doesn't.
+* GLOO has poor performance compared to others, but has the main advantage to be the only backend supporting ``float16`` training on CPU.
+
+
+
+Task 1: Image Classification
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+1a. Resnet-20, CIFAR-10
+"""""""""""""""""""""""
+
+#. **Frameworks**
     PyTorch and Tensorflow
 
-#. **Machine Type**
-    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
-
-#. **GPU Type**
-    `NVIDIA® Tesla® K80` (12GB GDDR5, Kepler arch) GPUs used for GPU training.
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
 
 #. **Metric**
     Time to Accuracy of 80% on validation set.
 
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
-    - `NVIDIA® Tesla® K80`: $0.45/hour (regular), $0.135/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
 
 
 * The next figure shows the speedup in training times to 80% accuracy relative to training on one node [3]_. The baseline time for 1 worker for the PyTorch CPU implementation is
@@ -306,32 +443,28 @@ Here we present the results for scaling tasks. All results were generated on the
 
 
 
-1b. Image Classification (ResNet, ImageNet)
-###########################################
+1b. Resnet-?, ImageNet
+""""""""""""""""""""""
 TODO
 
-2 Linear Learning
-~~~~~~~~~~~~~~~~~
+Task 2: Linear Learning
+^^^^^^^^^^^^^^^^^^^^^^^
 
-2a. Linear Learning (Logistic Regression, epsilon)
-##################################################
+2.a Logistic Regression, Epsilon 2008
+"""""""""""""""""""""""""""""""""""""
 
-#. **Framworks**
+#. **Frameworks**
     PyTorch
 
-#. **Machine Type**
-    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
-
-#. **GPU Type**
-    `NVIDIA® Tesla® K80` (12GB GDDR5, Kepler arch) GPUs used for GPU training.
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
 
 #. **Metric**
     Time to Accuracy of 80% on validation set.
 
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
-    - `NVIDIA® Tesla® K80`: $0.45/hour (regular), $0.135/hour (preemptible)
-
 
 * First figure shows the speedup of time to accuracy, for test accuracy of 89%, as the size of the cluster increases.
   Even though initially the speedup grows with the number of nodes added to the cluster,
@@ -362,35 +495,51 @@ TODO
 .. |pic7| image:: images/communication_time_ratio.png
     :scale: 48
 
-3 Natural Language Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Task 3: Language Modelling
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3a. Language Modeling
-#####################
-(TODO)
+3a. TODO
+""""""""
 
-3b. Translation EN-DE (GNMT, WMT14)
-###################################
-(TODO)
+Task 4: Machine Translation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3c. Translation EN-DE (Transformer, WMT17)
-##########################################
+4.a LSTM, WMT16 EN-DE
+"""""""""""""""""""""
 
-#. **Framworks**
+#. **Frameworks**
     PyTorch
 
-#. **Machine Type**
-    `n1-standard-4` instances on GCP with 15GB memory and 4 virtual CPUs.
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
 
-#. **GPU Type**
-    `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch) GPUs used for GPU training.
+#. **Metric**
+    Time to BLEU-Score of 24.0 on test set.
+
+#. **Pricing**
+    - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
+
+
+4.b Transformer, WMT17 EN-DE
+""""""""""""""""""""""""""""
+
+#. **Frameworks**
+    PyTorch
+
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+    - GPU: `NVIDIA® Tesla® T4` (16GB GDDR6, Turing arch)
 
 #. **Metric**
     Time to BLEU-Score of 25.0 on test set.
 
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
-    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $$0.11/hour (preemptible)
+    - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
 
 Benchmark Task Implementations
 ------------------------------

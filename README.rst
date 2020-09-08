@@ -54,7 +54,6 @@ MLBench consists of 5 Github repositories:
 Community
 ---------
 
-About us: See :doc:`Authors </authors>`
 
 Mailing list: https://groups.google.com/d/forum/mlbench
 

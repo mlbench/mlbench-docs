@@ -11,7 +11,7 @@ Then, the library can be installed directly using ``pip``:
 
    $ pip install mlbench-core
 
-This will add the ``mlbench`` CLI to the current environment, and will allow creation/deletion of clusters, as well as creating runs.
+This will install the ``mlbench`` CLI to the current environment, and will allow creation/deletion of clusters, as well as creating runs.
 
 .. code-block:: bash
 
@@ -108,15 +108,14 @@ Then to deploy the dashboard on the running cluster, we first need to set up hel
 
    $ kubectl --namespace kube-system create sa tiller
    $ kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-   $ helm init --service-account tiller
 
 Then, we install the chart on the cluster:
 
 .. code-block:: bash
 
    $ cd mlbench-helm
-   $ helm upgrade --wait --recreate-pods -f values.yml \
-        --timeout 900 --install ${RELEASE_NAME} . \
+   $ helm upgrade --wait --recreate-pods -f values.yaml \
+        --timeout 900s --install ${RELEASE_NAME} . \
         --set limits.workers=${NUM_NODES-1} \
         --set limits.gpu=${NUM_GPUS} \
         --set limits.cpu=${NUM_CPUS-1}

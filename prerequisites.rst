@@ -75,6 +75,8 @@ Example of cluster creation:
         --machine-type=n1-standard-4 --num-nodes=2 --disk-type=pd-standard \
         --disk-size=50 --scopes=storage-full
 
+If you would like to add GPU acceleration, add the following parameter ``--accelerator type=${GPU_TYPE},count=${NUM_GPUS}``
+
 .. _helm-install:
 
 Helm (Optional)

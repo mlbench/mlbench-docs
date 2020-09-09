@@ -1,6 +1,6 @@
-===============================================
-mlbench: Distributed Machine Learning Benchmark
-===============================================
+***********************************************
+MLBench: Distributed Machine Learning Benchmark
+***********************************************
 
 .. image:: https://travis-ci.com/mlbench/mlbench-core.svg?branch=develop
     :target: https://travis-ci.com/mlbench/mlbench-core
@@ -30,7 +30,7 @@ A public and reproducible collection of reference implementations and benchmark 
 
 
 Features
---------
+########
 
 * For reproducibility and simplicity, we currently focus on standard **supervised ML**, including standard deep learning tasks as well as classic linear ML models.
 * We provide **reference implementations** for each algorithm, to make it easy to port to a new framework.
@@ -41,7 +41,7 @@ Features
 
 
 Repositories
-------------
+############
 MLBench consists of 5 Github repositories:
 
 * Documentation: http://github.com/mlbench/mlbench-docs
@@ -52,8 +52,7 @@ MLBench consists of 5 Github repositories:
 
 
 Community
----------
-
+#########
 
 Mailing list: https://groups.google.com/d/forum/mlbench
 

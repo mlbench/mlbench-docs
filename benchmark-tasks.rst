@@ -1,6 +1,5 @@
 .. _benchmark-tasks:
 
-===============
 Benchmark Tasks
 ===============
 
@@ -73,7 +72,7 @@ Image classification is one of the most important problems in computer vision an
     airplanes, cars, birds, cats, deer, dogs, frogs, horses, ships, and trucks.
 
     The train / test split as provided in the dataset is used.
-    The test dataset contains 10,000 imagest with exactly 1000 randomly-selected images per each class.
+    The test dataset contains 10,000 images with exactly 1000 randomly-selected images per each class.
     The rest 50,000 images are training samples.
 
 #. **Training Algorithm**
@@ -247,7 +246,7 @@ Implementation details:
     Since ``float16`` has lower precision than ``float32``, it is necessary to have a loss scaler:
 
         - Start with ``loss_scale = initial_scale``
-        - Before each backward pass, inflate the loss by ``loss_scale`` (in ``float16``) to avoid underflows
+        - Before each backward pass, inflate the loss by ``loss_scale`` (in ``float16``) to avoid under-flows
         - Before weight update, deflate gradients by ``loss_scale`` (in ``float32``) to keep precision
         - Clip gradient norm to be ``grad_clip``
         - Check if gradient norm is ``nan`` or ``inf`` (in ``float16``). If True, ``loss_scale = loss_scale / scale_factor``.
@@ -317,7 +316,7 @@ Implementation details:
     - Loss Scaling
 
       + ``initial_scale = 2**7``
-      + ``scale_factor = 2`` (dowscale and upscale)
+      + ``scale_factor = 2`` (downscale and upscale)
       + ``scale_window = 2000`` (steps after upscale if no overflow/underflow)
 
 
@@ -334,7 +333,7 @@ Implementation details:
     Since ``float16`` has lower precision than ``float32``, it is necessary to have a loss scaler:
 
         - Start with ``loss_scale = initial_scale``
-        - Before each backward pass, inflate the loss by ``loss_scaling`` (in ``float16``) to avoid underflows
+        - Before each backward pass, inflate the loss by ``loss_scaling`` (in ``float16``) to avoid under-flows
         - Before weight update, deflate gradients by ``loss_scaling * full_batch_size / (world_size * update_freq)`` (in ``float32``) to keep precision, where ``full_batch_size`` is the batch size over all workers (sum of number of tokens on this batch for each worker).
         - Check if gradient norm is ``nan`` or ``inf`` (in ``float16``). If True, ``loss_scale = loss_scale / scale_factor``.
           If False, update weights.

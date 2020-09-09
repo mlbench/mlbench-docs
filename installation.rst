@@ -5,19 +5,43 @@ Installation
 
 Make sure to read :doc:`prerequisites` before installing mlbench.
 
-Automated Setup
----------------
-
-MLBench can be installed automatically using the MLBench CLI.
-
-Install the CLI:
+Then, the library can be installed directly using ``pip``:
 
 .. code-block:: bash
 
    $ pip install mlbench-core
 
+This will install the ``mlbench`` CLI to the current environment, and will allow creation/deletion of clusters, as well as creating runs.
 
-Then you can create a cluster by running:
+.. code-block:: bash
+
+   $ mlbench --help
+      Usage: mlbench [OPTIONS] COMMAND [ARGS]...
+
+      Console script for mlbench_cli.
+
+      Options:
+        --version  Print mlbench version
+        --help     Show this message and exit.
+
+      Commands:
+        charts             Chart the results of benchmark runs Save generated...
+        create-cluster     Create a new cluster.
+        delete             Delete a benchmark run
+        delete-cluster     Delete a cluster.
+        download           Download the results of a benchmark run
+        get-dashboard-url  Returns the dashboard URL of the current cluster
+        list-clusters      List all currently configured clusters.
+        run                Start a new run for a benchmark image
+        set-cluster        Set the current cluster to use.
+        status             Get the status of a benchmark run, or all runs if no...
+
+Cluster & Run Deployment (using CLI)
+------------------------------------
+
+One can easily deploy a cluster on both AWS and GCloud, using the ``mlbench`` CLI.
+
+For example, one can create a GCloud cluster by running:
 
 .. code-block:: bash
 
@@ -27,7 +51,7 @@ Then you can create a cluster by running:
 
 Which creates a cluster called ``my-cluster-3`` with 3 nodes (See ``mlbench create-cluster gcloud --help`` for more options).
 
-Once created, you can run experiments with:
+Once created, experiments can be run using:
 
 .. code-block:: bash
 
@@ -35,11 +59,15 @@ Once created, you can run experiments with:
 
    Benchmark:
 
-   [0] PyTorch Cifar-10 ResNet-20 Open-MPI
-   [1] PyTorch Cifar-10 ResNet-20 Open-MPI (SCaling LR)
-   [2] PyTorch Linear Logistic Regrssion Open-MPI
-   [3] Tensorflow Cifar-10 ResNet-20 Open-MPI
-   [4] Custom Image
+    [0]     PyTorch Cifar-10 ResNet-20
+    [1]     PyTorch Cifar-10 ResNet-20 (Scaling LR)
+    [2]     PyTorch Linear Logistic Regression
+    [3]     PyTorch Machine Translation GNMT
+    [4]     PyTorch Machine Translation Transformer
+    [5]     Tensorflow Cifar-10 ResNet-20 Open-MPI
+    [6]     PyTorch Distributed Backend benchmarking
+    [7]     Custom Image
+
 
    Selection [0]: 1
 
@@ -47,59 +75,76 @@ Once created, you can run experiments with:
 
    Run started with name my-run-2
 
-See ``mlbench run --help`` for more options.
+A few handy commands for quickstart:
 
-You can access the dashboard with ``mlbench get-dashboard-url``.
-
-To see the state of the experiment, run ``mlbench status my-run-2``.
-
-To download the results of the experiment, run ``mlbench download my-run-2``.
-
-Don't forget to delete the cluster once you're done by running ``mlbench delete-cluster gcloud my-cluster-3``
-
-Manual Setup
-------------
-The manual setup assumes you have checked out the `mlbench-helm <https://github.com/mlbench/mlbench-helm>`__ github repository and have a terminal open in the checked-out ``mlbench-helm`` directory.
-
-.. _google-cloud-setup:
-
-Google Cloud and Cluster Setup
-""""""""""""""""""""""""""""""
-
-This project provides a script to make all the Google Cloud and Cluster setup. In order to do so, please run the following commands:
-
-.. code-block:: bash
-
-    $ ./google_cloud_setup.sh create-cluster
-    $ ./google_cloud_setup.sh install-chart
-
-
-To delete cluster and cleanup:
-
-.. code-block:: bash
-
-    $ ./google_cloud_setup.sh delete-cluster
-
-To uninstall chart:
-
-.. code-block:: bash
-
-    $ ./google_cloud_setup.sh uninstall-chart
-
-For general information on the available commands, please run:
-
-.. code-block:: bash
-
-    $ ./google_cloud_setup.sh help
-
+ - To obtain the dashboard URL: ``mlbench get-dashboard-url``.
+ - To see the state of the experiment: ``mlbench status my-run-2``.
+ - To download the results of the experiment: ``mlbench download my-run-2``.
+ - To delete the cluster: ``mlbench delete-cluster gcloud my-cluster-3``
 
 .. _helm-charts:
 
-Helm Chart values
-"""""""""""""""""
+Manual helm chart deployment (Optional)
+---------------------------------------
 
-Since every Kubernetes is different, there are no reasonable defaults for some values, so the following properties have to be set.
-You can save them in a yaml file of your chosing. This guide will assume you saved them in `myvalues.yaml`. For a reference file for all configurable values, you can copy the `values.yaml` file to `myvalues.yaml`.
+Helm Chart installation
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The manual deployment requires the repo `mlbench-helm <https://github.com/mlbench/mlbench-helm>`_ to be cloned, and helm to be installed :ref:`helm-install`
+
+MLBench's Helm charts can also be deployed manually on a running Kubernetes cluster.
+For that, it is needed to have the credentials for the cluster in the ``kubectl`` config.
+For example, to obtain the credentials for a GCloud Kubernetes cluster, one should run
+
+.. code-block:: bash
+
+   $ gcloud container clusters get-credentials --zone ${MACHINE_ZONE} ${CLUSTER_NAME}
+
+This will setup ``kubectl`` for the cluster.
+
+Then to deploy the dashboard on the running cluster, we first need to set up helm with service-account with ``cluster-admin`` rights:
+
+.. code-block:: bash
+
+   $ kubectl --namespace kube-system create sa tiller
+   $ kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+Then, we install the chart on the cluster:
+
+.. code-block:: bash
+
+   $ cd mlbench-helm
+   $ helm upgrade --wait --recreate-pods -f values.yaml \
+        --timeout 900s --install ${RELEASE_NAME} . \
+        --set limits.workers=${NUM_NODES-1} \
+        --set limits.gpu=${NUM_GPUS} \
+        --set limits.cpu=${NUM_CPUS-1}
+
+Where :
+   - ``RELEASE_NAME`` represents the cluster name (called ``my-cluster-3`` in the example above)
+   - ``NUM_NODES`` is the maximum number of worker nodes available. This sets the maximum number of nodes that can be chosen for an experiment in the UI/CLI.
+   - ``NUM_GPUS`` is the number of gpus requested by each worker pod.
+   - ``NUM_CPUS`` is the maximum number of CPUs (Cores) available on each worker node. Uses Kubernetes notation (`8` or `8000m` for 8 cpus/cores). This is also the maximum number of Cores that can be selected for an experiment in the UI
+
+This will deploy the helm charts with the corresponding images to each node, and will set the hardware limits.
+
+.. note::
+   Get the application URL by running these commands:
+    .. code-block:: bash
+
+       $ export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services ${RELEASE_NAME}-mlbench-master)
+       $ export NODE_IP=$(gcloud compute instances list|grep $(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}") |awk '{print $5}')
+       $ gcloud compute firewall-rules create --quiet mlbench --allow tcp:$NODE_PORT,tcp:$NODE_PORT
+       $ echo http://$NODE_IP:$NODE_PORT
+
+.. danger::
+    The last command opens up a firewall rule to the google cloud. Make sure to delete the rule once it's not needed anymore:
+
+    .. code-block:: bash
+
+      $ gcloud compute firewall-rules delete --quiet mlbench
+
+One can also create a new ``myvalues.yml`` file with custom limits:
 
 .. code-block:: yaml
 
@@ -119,8 +164,8 @@ You can save them in a yaml file of your chosing. This guide will assume you sav
 - ``gcePersistentDisk.pdName`` is the name of persistent disk existed in GKE.
 
 .. Caution::
-   If you set ``workers``, ``cpu`` or ``gpu`` higher than available in your cluster, Kubernetes will not be able to allocate nodes to mlbench and the deployment will hang indefinitely, without throwing an exception.
-   Kubernetes will just wait until nodes that fit the requirements become available. So make sure your cluster actually has the requirements available that you requested.
+   If ``workers``, ``cpu`` or ``gpu`` are set higher than available in the cluster, Kubernetes will not be able to allocate nodes to mlbench and the deployment will hang indefinitely, without throwing an exception.
+   Kubernetes will just wait until nodes that fit the requirements become available. So make sure the cluster actually has the requested requirements.
 
 .. note::
    To use ``gpu`` in the cluster, the `nvidia device plugin <https://github.com/NVIDIA/k8s-device-plugin>`_ should be installed. See :ref:`plugins` for details
@@ -131,134 +176,23 @@ You can save them in a yaml file of your chosing. This guide will assume you sav
 .. note::
    The GCE persistent disk will be mounted to `/datasets/` directory on each worker.
 
-Helm Install
-""""""""""""
-
-Set the :ref:`helm-charts`
-
-Use helm to install the mlbench chart (Replace ``${RELEASE_NAME}`` with a name of your choice):
-
-.. code-block:: bash
-
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install ${RELEASE_NAME} .
-
-Follow the instructions at the end of the helm install to get the dashboard URL. E.g.:
-
-.. code-block:: bash
-   :emphasize-lines: 5,6,7
-
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install rel .
-     [...]
-     NOTES:
-     1. Get the application URL by running these commands:
-        export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services rel-mlbench-master)
-        export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-        echo http://$NODE_IP:$NODE_PORT
-
-This outputs the URL the Dashboard is accessible at.
+.. caution::
+   Google installs several pods on each node by default, limiting the available CPU. This can take up to 0.5 CPU cores per node. So make sure to provision VM's that have at least 1 more core than the amount of cores you want to use for you mlbench experiment.
+   See `here <https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture#memory_cpu>`__ for further details on node limits.
 
 .. _plugins:
 
 Plugins
-"""""""
+^^^^^^^
+
 In ``values.yaml``, one can optionally install Kubernetes plugins by turning on/off the following flags:
 
 - ``weave.enabled``: If true, install the `weave network plugin <https://github.com/weaveworks/weave>`_.
 - ``nvidiaDevicePlugin.enabled``: If true, install the `nvidia device plugin <https://github.com/NVIDIA/k8s-device-plugin>`_.
 
-Google Cloud / Google Kubernetes Engine
-"""""""""""""""""""""""""""""""""""""""
-
-Set the :ref:`helm-charts`
-
-.. important::
-   Make sure to read the prerequisites for :ref:`google-cloud`
-
-Please make sure that ``kubectl`` is configured `correctly <https://cloud.google.com/kubernetes-engine/docs/quickstart>`_.
-
-.. caution::
-   Google installs several pods on each node by default, limiting the available CPU. This can take up to 0.5 CPU cores per node. So make sure to provision VM's that have at least 1 more core than the amount of cores you want to use for you mlbench experiment.
-   See `here <https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture#memory_cpu>`__ for further details on node limits.
-
-Install mlbench (Replace ``${RELEASE_NAME}`` with a name of your choice):
-
-.. code-block:: bash
-
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900 --install ${RELEASE_NAME} .
-
-To access mlbench, run these commands and open the URL that is returned (**Note**: The default instructions returned by `helm` on the commandline return the internal cluster ip only):
-
-.. code-block:: bash
-
-   $ export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services ${RELEASE_NAME}-mlbench-master)
-   $ export NODE_IP=$(gcloud compute instances list|grep $(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}") |awk '{print $5}')
-   $ gcloud compute firewall-rules create --quiet mlbench --allow tcp:$NODE_PORT,tcp:$NODE_PORT
-   $ echo http://$NODE_IP:$NODE_PORT
-
-.. danger::
-   The last command opens up a firewall rule to the google cloud. Make sure to delete the rule once it's not needed anymore:
-
-   .. code-block:: bash
-
-      $ gcloud compute firewall-rules delete --quiet mlbench
-
-
-Minikube
-""""""""
-
-Minikube allows running a single-node Kubernetes cluster inside a VM on your laptop, for users looking to try out Kubernetes or to develop with it.
-
-Installing mlbench to `minikube <https://github.com/kubernetes/minikube>`_.
-
-Set the :ref:`helm-charts`
-
-.. important::
-   If you are using Kubernetes version 1.16 or higher you will need to to add the following line to `/etc/kubernetes/manifest/kube-apiserver.yaml`
-
-   .. code-block:: bash
-
-      --runtime-config=apps/v1beta1=true,apps/v1beta2=true,extensions/v1beta1/daemonsets=true,extensions/v1beta1/deployments=true,extensions/v1beta1/replicasets=true,extensions/v1beta1/networkpolicies=true,extensions/v1beta1/podsecuritypolicies=true
-
-
-Start minikube cluster
-
-.. code-block:: bash
-
-    $ minikube start
-
-
-Next install or upgrade a helm chart with desired configurations with name `${RELEASE_NAME}`
-
-.. code-block:: bash
-
-    $ helm init --kube-context minikube --wait
-    $ helm upgrade --wait --recreate-pods -f myvalues.yaml --timeout 900 --install ${RELEASE_NAME} .
-
-.. note::
-    The minikube runs a single-node Kubernetes cluster inside a VM. So we need to fix the :code:`replicaCount=1` in `values.yaml`.
-
-Once the installation is finished, one can obtain the url
-
-.. code-block:: bash
-
-    $ export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services ${RELEASE_NAME}-mlbench-master)
-    $ export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-    $ echo http://$NODE_IP:$NODE_PORT
-
-Now the mlbench dashboard should be available at :code:`http://${NODE_IP}:${NODE_PORT}`.
-
-.. note::
-  To access :code:`http://$NODE_IP:$NODE_PORT` outside minikube, run the following command on the host:
-
-  .. code-block:: bash
-
-      $ ssh -i ${MINIKUBE_HOME}/.minikube/machines/minikube/id_rsa -N -f -L localhost:${NODE_PORT}:${NODE_IP}:${NODE_PORT} docker@$(minikube ip)
-
-  where :code:`$MINIKUBE_HOME` is by default :code:`$HOME`. One can view mlbench dashboard at :code:`http://localhost:${NODE_PORT}`
-
 
 Kubernetes-in-Docker (KIND)
-"""""""""""""""""""""""""""
+---------------------------
 
 Kubernetes-in-Docker allows simulating multiple nodes locally on a single machine. This approach should be used only for local development and testing. It is not a recommended way to measure benchmark results. 
 

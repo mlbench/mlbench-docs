@@ -59,11 +59,15 @@ Once created, experiments can be run using:
 
    Benchmark:
 
-   [0] PyTorch Cifar-10 ResNet-20 Open-MPI
-   [1] PyTorch Cifar-10 ResNet-20 Open-MPI (SCaling LR)
-   [2] PyTorch Linear Logistic Regrssion Open-MPI
-   [3] Tensorflow Cifar-10 ResNet-20 Open-MPI
-   [4] Custom Image
+    [0]     PyTorch Cifar-10 ResNet-20
+    [1]     PyTorch Cifar-10 ResNet-20 (Scaling LR)
+    [2]     PyTorch Linear Logistic Regression
+    [3]     PyTorch Machine Translation GNMT
+    [4]     PyTorch Machine Translation Transformer
+    [5]     Tensorflow Cifar-10 ResNet-20 Open-MPI
+    [6]     PyTorch Distributed Backend benchmarking
+    [7]     Custom Image
+
 
    Selection [0]: 1
 

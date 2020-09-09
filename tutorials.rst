@@ -1,4 +1,3 @@
-================
 Tutorials
 ================
 
@@ -6,7 +5,7 @@ Tutorials
 
 Also check out our Blog_ for good tips and the latest news!
 
-Adding an existing PyTorch training script into MLbench
+Adding an existing PyTorch training script into MLBench
 ----------------------------------------------------------
 
 In this tutorial, we will go through the process of adapting existing distributed PyTorch code to work with the MLBench framework. This allows you to run your models in the MLBench environment and easily compare them
@@ -15,10 +14,11 @@ with our reference implementations as baselines to see how well your code perfor
 MLBench is designed to easily be used with third-party models, allowing for quick and fair comparisons by standardizing the data distribution, evaluation dataset and providing evaluation code.
 It saves all of the hassle that's needed to implement your own baselines for comparison.
 
-We will adapt the code from the official `PyTorch distributed tutorial <https://pytorch.org/tutorials/intermediate/dist_tuto.html>`_ to run in MLBench. If you're unfamiliar with that tutorial, it might be worth giving it a quick look so you know what we're working with.
+We will adapt the code from the official `PyTorch distributed tutorial <https://pytorch.org/tutorials/intermediate/dist_tuto.html>`_ to run in MLBench.
+If you're unfamiliar with that tutorial, it might be worth giving it a quick look so you know what we're working with.
 
 Adapting the Code
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 To get started, create a new directory ``mlbench-pytorch-tutorial`` and copy the `train_dist.py <https://github.com/seba-1511/dist_tuto.pth/blob/gh-pages/train_dist.py>`_ file into it.
 
@@ -79,7 +79,8 @@ We also need to change the ``init_processes`` method to reflect our previous cha
         dist.init_process_group(backend, rank=rank, world_size=len(world_size))
         run(rank, world_size, run_id)
 
-Next, we need to change the signature of the ``run`` method to add the ``run_id`` parameter. The ``run_id`` is a unique identifier automatically assigned by MLBench to identify an individual run and all its data and performance metrics.
+Next, we need to change the signature of the ``run`` method to add the ``run_id`` parameter. The ``run_id`` is a unique identifier automatically assigned
+by MLBench to identify an individual run and all its data and performance metrics.
 
 .. code-block:: python
     :linenos:
@@ -93,7 +94,8 @@ stats during training. Results are shown either in the Dashboard (where
 you can see them in real time) or can be downloaded at any time during the 
 run from the command line. So let's add some reporting functionality.
 
-The PyTorch script reports loss to ``stdout``, but we can easily report the loss to MLBench as well. First we need to import the relevant MLBench functionality by adding the following line to the imports at the top of the file:
+The PyTorch script reports loss to ``stdout``, but we can easily report the loss to MLBench as well. First we need to import the relevant MLBench
+functionality by adding the following line to the imports at the top of the file:
 
 .. code-block:: python
     :linenos:
@@ -171,7 +173,7 @@ We have to tell the tracker that we're in the training loop by calling ``tracker
 That's it. Now the training will report the loss of each worker back to the Dashboard and the output result files. 
 On the Dashboard, you will also see a nice graph showing this data.
 
-For the official tasks, we also need to report validation stats to the tracker and use the offical validation code. Rename the current ``partition_dataset()`` method to ``partition_dataset_train``
+For the official tasks, we also need to report validation stats to the tracker and use the official validation code. Rename the current ``partition_dataset()`` method to ``partition_dataset_train``
 and add a new partition method to load the validation set:
 
 .. code-block:: python
@@ -197,7 +199,7 @@ and add a new partition method to load the validation set:
         return val_set, bsz
 
 Then load the validation set and add the goal for the official task (The `Task 1a goal <https://mlbench.readthedocs.io/en/latest/benchmark-tasks.html#a-image-classification-resnet-cifar-10>`_
-is used for illustration purposes in thsi example):
+is used for illustration purposes in this example):
 
 .. code-block:: python
     :linenos:
@@ -249,7 +251,7 @@ Now all that is needed is to add the validation loop code (``validation_round()`
 The full code (with some additional improvements) is in our `Github Repo <https://github.com/mlbench/mlbench-benchmarks/blob/master/examples/mlbench-pytorch-tutorial/>`_.
 
 Creating a Docker Image for Kubernetes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To actually run our code, we need to wrap it in a Docker Image. We could create one from scratch, but it's easier to use the PyTorch Base image provided by MLBench, which already includes everything you might need for executing a PyTorch model.
 
@@ -273,7 +275,7 @@ Create a new file called ``Dockerfile`` in the ``mlbench-pytorch-tutorial`` dire
 
     ENV PYTHONPATH /codes
 
-The ``mlbench-pytorch-base:latest`` image already contains all neccessary libraries, but if your image requires additional python libraries, you can add them with the commands on lines 6 and 7, along with adding a ``requirements.txt`` file.
+The ``mlbench-pytorch-base:latest`` image already contains all necessary libraries, but if your image requires additional python libraries, you can add them with the commands on lines 6 and 7, along with adding a ``requirements.txt`` file.
 
 In order for Kubernetes to access the image, you have to build and upload it to a Docker registry that's accessible to Kubernetes, for instance `Docker Hub <https://hub.docker.com/>`_ (Make sure to change the Docker image and repo name accordingly):
 
@@ -286,7 +288,7 @@ In order for Kubernetes to access the image, you have to build and upload it to 
 The image is now built and available for running in MLBench.
 
 Running the code in MLBench
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Navigate to the MLBench Dashboard and go to the ``Runs`` page.
 
@@ -371,7 +373,7 @@ To create a new Google cloud cluster, simply run (this might take a couple of mi
 
 This creates a cluster with 3 nodes called ``my-cluster-3`` and sets up the mlbench deployment in that cluster. Note that the number of nodes should always be 1 higher than the maximum number of workers you want to run.
 
-To start an experiment, simpy run:
+To start an experiment, simply run:
 
 .. code-block:: shell
 
@@ -379,13 +381,24 @@ To start an experiment, simpy run:
 
     Benchmark:
 
-    [0] PyTorch Cifar-10 ResNet-20 Open-MPI
-    [1] PyTorch Cifar-10 ResNet-20 Open-MPI (SCaling LR)
-    [2] PyTorch Linear Logistic Regrssion Open-MPI
-    [3] Tensorflow Cifar-10 ResNet-20 Open-MPI
-    [4] Custom Image
+    [0]     PyTorch Cifar-10 ResNet-20
+    [1]     PyTorch Cifar-10 ResNet-20 (Scaling LR)
+    [2]     PyTorch Linear Logistic Regression
+    [3]     PyTorch Machine Translation GNMT
+    [4]     PyTorch Machine Translation Transformer
+    [5]     Tensorflow Cifar-10 ResNet-20 Open-MPI
+    [6]     PyTorch Distributed Backend benchmarking
+    [7]     Custom Image
 
     Selection [0]: 1
+    Backend:
+
+    [0]     MPI
+    [1]     GLOO
+    [2]     NCCL
+    [3]     Custom Backend
+
+    Selection [0]: 0
 
     [...]
 
@@ -402,13 +415,25 @@ You can also start multiple runs at the same time, which will be scheduled as no
 
     Benchmark:
 
-    [0] PyTorch Cifar-10 ResNet-20 Open-MPI
-    [1] PyTorch Cifar-10 ResNet-20 Open-MPI (SCaling LR)
-    [2] PyTorch Linear Logistic Regrssion Open-MPI
-    [3] Tensorflow Cifar-10 ResNet-20 Open-MPI
-    [4] Custom Image
+    [0]     PyTorch Cifar-10 ResNet-20
+    [1]     PyTorch Cifar-10 ResNet-20 (Scaling LR)
+    [2]     PyTorch Linear Logistic Regression
+    [3]     PyTorch Machine Translation GNMT
+    [4]     PyTorch Machine Translation Transformer
+    [5]     Tensorflow Cifar-10 ResNet-20 Open-MPI
+    [6]     PyTorch Distributed Backend benchmarking
+    [7]     Custom Image
+
 
     Selection [0]: 1
+    Backend:
+
+    [0]     MPI
+    [1]     GLOO
+    [2]     NCCL
+    [3]     Custom Backend
+
+    Selection [0]: 0
 
     [...]
 
@@ -470,10 +495,3 @@ you also need to delete it by passing the same flag and argument to ``mlbench de
 
     # delete cluster
     $ mlbench delete-cluster gcloud -z europe-west2-b my-cluster-3
-
-
-
-
-
-
-

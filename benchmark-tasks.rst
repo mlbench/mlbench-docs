@@ -1,6 +1,6 @@
 .. _benchmark-tasks:
 
-Benchmark Tasks
+Benchmarks
 ===============
 
 The results can be found here: benchmark-task-results_

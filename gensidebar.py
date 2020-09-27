@@ -76,10 +76,10 @@ def generate_sidebar(conf, conf_api):
     #
 
     toctree("MLBench")
+    write("Benchmarks", "benchmark-tasks")
     write("Prerequisites", "prerequisites")
     write("Installation", "installation")
     write("Component Overview", "overview")
-    write("Benchmarking Tasks", "benchmark-tasks")
     write("Tutorials", "tutorials")
     endl()
 

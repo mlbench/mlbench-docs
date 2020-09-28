@@ -560,8 +560,8 @@ and is only used as an indicator to see the maximum achievable speedup with ligh
 
 A few interesting points:
 
-* Overall speedups follow a :math:`log_2(n)` with ``n = num_workers``, while compute are roughly linear.
-* Linear speedup of compute implies a nearly perfect scaling for this task.
+* Overall speedups follows a :math:`log_2(n)` with ``n = num_workers``, while compute are roughly linear.
+* Scaling the number of compute nodes gives nearly perfect scaling for this task
 * Using more powerful communication hardware (e.g. ``Tesla V100``) will positively affect speedups.
 
 .. figure:: images/results/task4a/task4a_times.png
@@ -573,8 +573,8 @@ A few interesting points:
 
 This figure shows the total time spent in each step for all cluster sizes.
 
-* Total time and compute step times decrease in a logarithmic fashion, which confirms our previous statement.
-* Time spent optimizing doesn't seem to follow the same path, but increases are insignificant (~10 seconds), and are due to additional compute steps when using distribution
+* Total time and compute step times decrease in a logarithmic fashion with the increase of number of nodes, which confirms our previous statement.
+* Time spent optimizing doesn't seem to follow the same path, but increases are insignificant (~10 seconds), and are due to additional compute steps (averaging tensors, computations related to Mixed precision) when using distribution
 * Total communication time increases also logarithmically
 
 .. figure:: images/results/task4a/task4a_loss_ratio_prices.png
@@ -582,7 +582,7 @@ This figure shows the total time spent in each step for all cluster sizes.
     :align: center
     :alt: Loss, Ratio and prices for task 4a
 
-    Train loss (right), Ratio of communication, Price index for Task 4a
+    Train loss (right), Ratio of communication to total time, Price index for Task 4a
 
 This figure shows, the train losses (right), Ratio of communication to total time, and a price index.
 The price index is computed as follows :math:`index = \frac{price\_increase}{performance\_increase}`
@@ -633,7 +633,7 @@ A few interesting points:
 
 * Overall speedups follow a similar path than Task 4a, with even better speedups when not considering communication.
 * Linear speedup of compute implies a nearly perfect scaling for this task.
-* Using more powerful communication hardware (e.g. ``Tesla V100``) will also positively affect speedups.
+* Using more powerful communication hardware (e.g. ``NVLink®``) will also positively affect speedups.
 
 
 .. figure:: images/results/task4b/task4b_times.png
@@ -652,7 +652,7 @@ in all step times.
     :align: center
     :alt: Loss, Ratio and prices for task 4b
 
-    Train loss (right), Ratio of communication, Price index for Task 4b
+    Train loss (right), Ratio of communication to total time, Price index for Task 4b
 
 This figure shows, the train losses (right), Ratio of communication to total time, and a price index.
 Communication times ratio is lower than Task 4a for more workers, but still reaches over 50% for 8 workers.

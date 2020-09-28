@@ -24,6 +24,7 @@ The variable dimensions are:
 - Network
   - Impact of bandwidth and latency
 
+----
 
 Benchmark Task Descriptions
 ---------------------------
@@ -262,7 +263,7 @@ Implementation details:
     The bandwidth between two nodes is around 7.5Gbit/s. ``MPI`` or ``NCCL`` are used for communication.
 
 
-.. figure:: images/lr_schedulers_gnmt_transformer.png
+.. figure:: images/benchmark_tasks/lr_schedulers_gnmt_transformer.png
     :scale: 15
     :align: center
 
@@ -347,6 +348,7 @@ Implementation details:
     We use a single process per node environment, with one GPU per process (i.e. one GPU per node).
     The bandwidth between two nodes is around 7.5Gbit/s. ``MPI`` or ``NCCL`` are used for communication.
 
+----
 
 .. _benchmark-task-results:
 
@@ -362,7 +364,10 @@ Task 0: Communication Backend
 """"""""""""""""""""""
 
 #. **Frameworks**
-    PyTorch
+    - PyTorch 1.5.0
+
+#. Communication Backends:
+    - MPI (OpenMPI), GLOO and NCCL
 
 #. **System Hardware**
     - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
@@ -373,16 +378,27 @@ Task 0: Communication Backend
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
     - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
 
-.. figure:: images/task_0a_times.png
-    :scale: 15
+.. figure:: images/results/task0a/task0a_comparison_by_workers.png
+    :scale: 40
     :align: center
 
-    Figure 2: Communication times for 2 workers
+    Communication for 2 to 8 workers (CPU tensors)
 
-* Figure 2 shows the communication times between 2 workers for each backend, for tensors of type ``float32`` and ``float16``, both on CPU and GPU.
+.. figure:: images/results/task0a/task0a_comparison_by_workers_CUDA.png
+    :scale: 40
+    :align: center
+
+    Communication for 2 to 8 workers (GPU tensors)
+
+* The first figure shows the communication times between 2, 4, and 8 workers for ``float32`` and ``float16`` CPU tensors, for GLOO and MPI backends.
+* The second figure shows the communication times between 2, 4, and 8 workers for ``float32`` and ``float16`` GPU tensors, for GLOO, MPI and NCCL backends.
+* MPI and GLOO both support CPU tensor communication, while NCCL only supports GPU tensors.
+* NCCL and GLOO both support ``float16`` communication, while MPI only supports ``float32``.
 * This graph allows for a quantitative comparison of the different backends, and to study their advantages/disadvantages.
-* We can see that MPI behaves well for small ``float32`` tensors, with similar performance as NCCL.
-* NCCL works better than MPI for larger tensors, and has the advantage of supporting ``float16``, while MPI doesn't.
+* We can see that MPI behaves better than GLOO for small ``float32`` CPU tensors, with similar performance they get larger.
+* MPI seems to be less affected by increased cluster sizes.
+* MPI and NCCL have comparable performance for 2 workers (for small tensors), but NCCL gets slower as cluster size increases.
+* NCCL always has better performance for very large tensors, and supports ``float16``, while MPI doesn't.
 * GLOO has poor performance compared to others, but has the main advantage to be the only backend supporting ``float16`` training on CPU.
 
 
@@ -395,7 +411,11 @@ Task 1: Image Classification
 """""""""""""""""""""""
 
 #. **Frameworks**
-    PyTorch and Tensorflow
+    - PyTorch 1.5.0
+    - Tensorflow
+
+#. Communication Backends:
+    - MPI (OpenMPI), GLOO and NCCL
 
 #. **System Hardware**
     - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
@@ -413,13 +433,13 @@ Task 1: Image Classification
 * The next figure shows the speedup in training times to 80% accuracy relative to training on one node [3]_. The baseline time for 1 worker for the PyTorch CPU implementation is
   5895 s, for the PyTorch GPU implementation 407 s and for the Tensorflow GPU implementation 1191 s.
 
-.. image:: images/task1a_speedup.png
+.. image:: images/results/task1a/task1a_speedup.png
     :scale: 48
     :align: center
 
 * This figure shows the time spent in compute and communication for the PyTorch GPU implementation on 1, 2, 4, 8 and 16 workers.
 
-.. image:: images/scaling-comm-compute-gpu.png
+.. image:: images/results/task1a/scaling-comm-compute-gpu.png
     :scale: 26
     :align: center
 
@@ -428,7 +448,7 @@ Task 1: Image Classification
 * The next figure compares the cost of experiment. Note that a regular `n1-standard-4` instance costs $0.19 per hour and
   a preemptible one costs only $0.04. `NVIDIA® Tesla® K80` GPUs (preemtpible) cost $0.135 per hour. All costs shown are for premtible instances.
 
-.. image:: images/task1a_pricing.png
+.. image:: images/results/task1a/task1a_pricing.png
     :scale: 48
     :align: center
 
@@ -453,7 +473,10 @@ Task 2: Linear Learning
 """""""""""""""""""""""""""""""""""""
 
 #. **Frameworks**
-    PyTorch
+    - PyTorch 1.5.0
+
+#. Communication Backends:
+    - MPI (OpenMPI), GLOO
 
 #. **System Hardware**
     - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
@@ -485,13 +508,13 @@ Task 2: Linear Learning
 
 |pic7|
 
-.. |pic5| image:: images/SGD_time_to_accuracy.png
+.. |pic5| image:: images/results/task2a/SGD_time_to_accuracy.png
     :scale: 48
 
-.. |pic6| image:: images/SGD_loss_time.png
+.. |pic6| image:: images/results/task2a/SGD_loss_time.png
     :scale: 48
 
-.. |pic7| image:: images/communication_time_ratio.png
+.. |pic7| image:: images/results/task2a/communication_time_ratio.png
     :scale: 48
 
 Task 3: Language Modelling
@@ -507,7 +530,10 @@ Task 4: Machine Translation
 """""""""""""""""""""
 
 #. **Frameworks**
-    PyTorch
+    - PyTorch 1.5.0
+
+#. Communication Backends:
+    - NCCL
 
 #. **System Hardware**
     - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
@@ -522,11 +548,63 @@ Task 4: Machine Translation
     - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
 
 
+.. figure:: images/results/task4a/task4a_speedup.png
+    :scale: 15
+    :align: center
+    :alt: Speedups for Task 4a
+
+    Speedups for Task 4a: with communication times (left), without (right)
+
+This figures shows the absolute speedup (left), and the compute speedup (right). The compute speedup doesn't account for communication times,
+and is only used as an indicator to see the maximum achievable speedup with lightspeed communication.
+
+A few interesting points:
+
+* Overall speedups follows a :math:`log_2(n)` with ``n = num_workers``, while compute are roughly linear.
+* Scaling the number of compute nodes gives nearly perfect scaling for this task
+* Using more powerful communication hardware (e.g. ``Tesla V100``) will positively affect speedups.
+
+.. figure:: images/results/task4a/task4a_times.png
+    :scale: 15
+    :align: center
+    :alt: Times for Task 4a
+
+    Step times for task 4a
+
+This figure shows the total time spent in each step for all cluster sizes.
+
+* Total time and compute step times decrease in a logarithmic fashion with the increase of number of nodes, which confirms our previous statement.
+* Time spent optimizing doesn't seem to follow the same path, but increases are insignificant (~10 seconds), and are due to additional compute steps (averaging tensors, computations related to Mixed precision) when using distribution
+* Total communication time increases also logarithmically
+
+.. figure:: images/results/task4a/task4a_loss_ratio_prices.png
+    :scale: 15
+    :align: center
+    :alt: Loss, Ratio and prices for task 4a
+
+    Train loss (right), Ratio of communication to total time, Price index for Task 4a
+
+This figure shows, the train losses (right), Ratio of communication to total time, and a price index.
+The price index is computed as follows :math:`index = \frac{price\_increase}{performance\_increase}`
+
+The center graph is useful, as it depicts the limits of distribution for this model, using the described hardware. We can see that
+after 8 workers, communication takes up more than 50% of total time,
+
+The right-most graph, shows the worthiness of distribution:
+
+* The price increase is less than the performance increase for 2, 4, and 8 workers. This suggests that distribution is worth the price increase
+* The 4 workers case seems to be the best price-performance trade-off.
+
+
+
 4.b Transformer, WMT17 EN-DE
 """"""""""""""""""""""""""""
 
 #. **Frameworks**
-    PyTorch
+    - PyTorch 1.5.0
+
+#. Communication Backends:
+    - NCCL
 
 #. **System Hardware**
     - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
@@ -539,6 +617,52 @@ Task 4: Machine Translation
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
     - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
+
+
+.. figure:: images/results/task4b/task4b_speedup.png
+    :scale: 15
+    :align: center
+    :alt: Speedups for Task 4b
+
+    Speedups for Task 4b: with communication times (left), without (right)
+
+This figures shows the absolute speedup (left), and the compute speedup (right). The compute speedup doesn't account for communication times,
+and is only used as an indicator to see the maximum achievable speedup with lightspeed communication.
+
+A few interesting points:
+
+* Overall speedups follow a similar path than Task 4a, with even better speedups when not considering communication.
+* Linear speedup of compute implies a nearly perfect scaling for this task.
+* Using more powerful communication hardware (e.g. ``NVLink®``) will also positively affect speedups.
+
+
+.. figure:: images/results/task4b/task4b_times.png
+    :scale: 15
+    :align: center
+    :alt: Times for Task 4b
+
+    Step times for task 4b
+
+This figure shows the total time spent in each step for all cluster sizes. We can observe very similar behaviour than Task 4a
+in all step times.
+
+
+.. figure:: images/results/task4b/task4b_loss_ratio_prices.png
+    :scale: 15
+    :align: center
+    :alt: Loss, Ratio and prices for task 4b
+
+    Train loss (right), Ratio of communication to total time, Price index for Task 4b
+
+This figure shows, the train losses (right), Ratio of communication to total time, and a price index.
+Communication times ratio is lower than Task 4a for more workers, but still reaches over 50% for 8 workers.
+
+The price index however, has a very different shape:
+
+* All price indices are below one.
+* This suggests that distributing this particular model on the mentioned hardware is always beneficial despite the price increase.
+* Training Transformer models seems to always benefit from distribution.
+
 
 Benchmark Task Implementations
 ------------------------------

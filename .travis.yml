@@ -1,0 +1,14 @@
+os: linux
+dist: xenial
+
+jobs:
+  include:
+    - stage: make docs
+      language: python
+      python: 3.7
+
+      install:
+        - pip intall -r requirements.txt
+
+      script:
+        - make html

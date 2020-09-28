@@ -294,13 +294,11 @@ Navigate to the MLBench Dashboard and go to the ``Runs`` page.
 
 Create a new Run:
 
-.. <a href="{{ site.baseurl }}public/images/New_Run.png" data-lightbox="New_Run" data-title="New Run Page">
-..  <img src="{{ site.baseurl }}public/images/New_Run.png" alt="New Run Page" style="max-width:80%;"/>
-.. </a>
 
-.. image:: images/New_Run.png
+.. figure:: images/tutorials/New_Run.png
     :width: 80%
     :align: center
+    :alt: New Run Page
 
 Enter the URL of the newly uploaded Docker image (The host can be left out if you use Docker Hub). Then enter the command to execute on each worker:
 
@@ -314,13 +312,11 @@ The values in brackets will be substituted by MLBench with the correct values an
 We also need to choose which backend we want to run on (in our case, MPI) and 
 set the number of workers on which we want to execute our run.
 
-.. <a href="{{ site.baseurl }}public/images/Pytorch_New_Run.png" data-lightbox="Pytorch_New_Run" data-title="Create New PyTorch Run">
-..  <img src="{{ site.baseurl }}public/images/Pytorch_New_Run.png" alt="Create New PyTorch Run" style="max-width:80%;"/>
-.. </a>
 
-.. image:: images/Pytorch_New_Run.png
+.. image:: images/tutorials/Pytorch_New_Run.png
     :width: 60%
     :align: center
+    :alt: Create New PyTorch Run
 
 Now we're all set to start our experiment. Hit ``Add Run`` and that's it. You just ran a custom model on MLBench.
 If you are only running from the command line, you can execute:
@@ -336,12 +332,11 @@ If you are running from the command line, you will see these printed to your ter
 and will be able to access the training data and results using ``mlbench download <run_name>``
 (check out our tutorial on :ref:`cmdline-tutorial` for more information).
 
-.. <a href="{{ site.baseurl }}public/images/pytorch-tutorial-result.png" data-lightbox="Pytorch_Tutorial_Result" data-title="Result of the Tutorial">
-..  <img src="{{ site.baseurl }}public/images/pytorch-tutorial-result.png" alt="Result of the Tutorial" style="max-width:80%;"/>
-.. </a>
 
-.. image:: images/pytorch-tutorial-result.png
+.. image:: images/tutorials/pytorch-tutorial-result.png
     :align: center
+    :width: 80%
+    :alt: Result of the Tutorial
 
 
 .. _cmdline-tutorial:

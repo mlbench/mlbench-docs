@@ -263,7 +263,7 @@ Implementation details:
     The bandwidth between two nodes is around 7.5Gbit/s. ``MPI`` or ``NCCL`` are used for communication.
 
 
-.. figure:: images/lr_schedulers_gnmt_transformer.png
+.. figure:: images/benchmark_tasks/lr_schedulers_gnmt_transformer.png
     :scale: 15
     :align: center
 
@@ -448,7 +448,7 @@ Task 1: Image Classification
 * The next figure compares the cost of experiment. Note that a regular `n1-standard-4` instance costs $0.19 per hour and
   a preemptible one costs only $0.04. `NVIDIA® Tesla® K80` GPUs (preemtpible) cost $0.135 per hour. All costs shown are for premtible instances.
 
-.. image:: images/tresults/task1a/ask1a_pricing.png
+.. image:: images/results/task1a/task1a_pricing.png
     :scale: 48
     :align: center
 
@@ -508,13 +508,13 @@ Task 2: Linear Learning
 
 |pic7|
 
-.. |pic5| image:: images/SGD_time_to_accuracy.png
+.. |pic5| image:: images/results/task2a/SGD_time_to_accuracy.png
     :scale: 48
 
-.. |pic6| image:: images/SGD_loss_time.png
+.. |pic6| image:: images/results/task2a/SGD_loss_time.png
     :scale: 48
 
-.. |pic7| image:: images/communication_time_ratio.png
+.. |pic7| image:: images/results/task2a/communication_time_ratio.png
     :scale: 48
 
 Task 3: Language Modelling

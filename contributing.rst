@@ -150,12 +150,12 @@ The MLBench installation through the CLI automatically uses the latest version o
 chart = ChartBuilder(
             {
             "name": "mlbench-helm",
-             "source": {
+            "source": {
                  "type": "git",
                  "location": "https://github.com/mlbench/mlbench-helm"               
                  "reference": "new-feature"
                  },
-             }
+            }
         )
         
 Now, when you run the command for creating the cluster, it will install MLBench using your own helm chart instead of the default one. 

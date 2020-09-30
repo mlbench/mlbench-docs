@@ -151,10 +151,10 @@ chart = ChartBuilder(
             {
             "name": "mlbench-helm",
             "source": {
-                 "type": "git",
-                 "location": "https://github.com/mlbench/mlbench-helm"               
-                 "reference": "new-feature"
-                 },
+                      "type": "git",
+                      "location": "https://github.com/mlbench/mlbench-helm"               
+                      "reference": "new-feature"
+                      },
             }
         )
         

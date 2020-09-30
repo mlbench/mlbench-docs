@@ -115,3 +115,21 @@ Then run::
 $ bumpversion patch # possible: major / minor / patch
 $ git push
 $ git push --tags
+
+Repositories
+------------
+mlbench-core
+~~~~~~~~~~~~
+
+To contribute to mlbench-core, you first need to clone the mlbench-core repository, create a new branch for the feature, make the changes and then create a new local commit. For local development and testing, you do not need to push the changes to Github. You need to create a development release on PyPi with the changes. To do this, you need an account that has permission to do releases on the mlbench-core PyPi project. Then, inside the git repository you need to run::
+
+$ bumpversion --verbose --allow-dirty --no-tag --no-commit dev
+
+This will bump the version of the development release. You need to be aware that if someone else published a development release on PyPI since your last release, bumpversion will not take this into account. In this case, you need to manually bump the version. To do this, you first need to check what is the latest dev release on PyPI. Let us assume that the latest version on PyPI is ``2.4.0.dev240``. Now, you need to enter the version ``2.4.0-dev241`` in the files ``setup.py``, ``setup.cfg`` and ``mlbench_core/__init__.py``. You should also be careful that the formatting of the version in the files is different than on PyPI. However, the files will already contain some version, so you only need to change the numbering and not the formatting. After you have done this, you need to build and upload the release by running the following commands inside the git repository::
+
+$ python setup.py sdist bdist_wheel
+$ python -m twine upload dist/*
+
+If everything is successful, you should be able to see your release on PyPI. Now, to test this release you need to go to the benchmark directory and locate the file requirements.txt. Inside, there should be a line for mlbench-core specifying the version. You should replace the version with the one you just released. In the previous example you would need to specify ``mlbench-core==2.4.0-dev241``. Depending on your changes, you may want to modify the code for the benchmark in the file ``main.py``. This is necessary for example when you add a new optimizer and you want to test the benchmark using it. In this case, you need to replace the previous optimizer with the new one in ``main.py``. After you are done with the changes, you need to build and push the docker image to Docker Hub. This can be done by running the ``docker build`` and ``docker push`` commands inside the benchmark repository. In order to be able to push to Docker Hub, you need to create an account and login using the command ``docker login``. Once you have the image on Docker Hub, you can use it as a custom image in MLBench when starting a run either through the CLI or the dashboard. When prompted for the image location, you only need to specify the repository and image name because MLBench automatically looks for the image on Docker Hub. You have to note that this procedure is only required when making changes that need to be tested by running a benchmark. For example, if you want to simply make changes in the CLI, you can modify the file ``cli.py`` and test it locally using::
+
+$ python cli.py <specific-command>

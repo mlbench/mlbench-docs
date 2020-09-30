@@ -143,22 +143,7 @@ MLBench offers a choice between different optimizers, learning rate schedulers e
 mlbench-helm
 ~~~~~~~~~~~~
 
-The MLBench installation through the CLI automatically uses the latest version of the master branch in the ``mlbench-helm`` repository. To test your own version of the helm chart without changing the master branch you first need to push your changes to a different branch in ``mlbench-helm``. Then, you need to change the file ``mlbench_core/cli/cli.py`` inside the ``mlbench-core`` repository. This file contains the CLI functionalities and you can test MLBench by running it locally. To use your own version of the helm chart, you need to locate the code for creating the ``ChartBuilder`` object in the function you want to use. MLBench has different functions for different cloud providers. For testing, you can pick one provider, find the function for creating a cluster on that provider and modify the ``ChartBuilder`` object to use your own branch. For example, let’s say that you have pushed your changes to the branch ``new-feature`` in the helm repository. Then, you should specify that branch using the ``source.reference`` parameter like this:
-
-.. code-block:: python
-
-chart = ChartBuilder(
-            {
-            "name": "mlbench-helm",
-            "source": {
-                      "type": "git",
-                      "location": "https://github.com/mlbench/mlbench-helm"               
-                      "reference": "new-feature"
-                      },
-            }
-        )
-        
-Now, when you run the command for creating the cluster, it will install MLBench using your own helm chart instead of the default one. 
+The MLBench installation through the CLI automatically uses the latest version of the master branch in the ``mlbench-helm`` repository. To test your own version of the helm chart without changing the master branch you first need to push your changes to a different branch in ``mlbench-helm``. Then, you need to change the file ``mlbench_core/cli/cli.py`` inside the ``mlbench-core`` repository. This file contains the CLI functionalities and you can test MLBench by running it locally. To use your own version of the helm chart, you need to locate the code for creating the ``ChartBuilder`` object in the function you want to use. MLBench has different functions for different cloud providers. For testing, you can pick one provider, find the function for creating a cluster on that provider and modify the ``ChartBuilder`` object to use your own branch. For example, let’s say that you have pushed your changes to the branch ``new-feature`` in the helm repository. Then, you should change the value of the ``source.reference`` field of the ``ChartBuilder`` object to ``new-feature``. Now, when you run the command for creating the cluster, it will install MLBench using your own helm chart instead of the default one. 
 
 mlbench-dashboard
 ~~~~~~~~~~~~~~~~~

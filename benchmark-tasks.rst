@@ -199,28 +199,26 @@ Task 4: Machine Translation
     dataset containing a set of translated sentences from multiple languages.
     We exclusively use English-German translation from this dataset.
 
+    The model is trained on sentences of maximum length 75 tokens, and tested on sentences of max length 150 tokens.
+
 
 #. **Training Algorithm**
     We use Synchronous distributed Adam as the optimizer, which is similar to :cite:`DBLP:journals/corr/0002AMVSKKD16`,
     but uses Adam's update rule:
     Before each weight update, gradients on all workers are summed using an ``all_reduce`` operation;
     that way, all workers share their gradients and obtain the same weight update.
-    However, since the data is quite large, weight updates don't happen for all batches. Instead, the gradients are aggregated
-    for a certain number of batches. For example, when using 2 workers, we update every 8 batches (for 4 workers, it would be 4 batches).
-    We call this parameter `update frequency`.
 
     Also, this training algorithm uses mixed precision training (explained below).
 
     - number of machines ``k = 1, 2, 4, 8, 16, 32``
-    - minibatch size per worker ``b = 128`` sentences
-    - update frequency ``update_freq = max(16 // num_workers, 1)``
+    - global minibatch size ``b = 2048`` sentences [1]_
     - maximum epochs: 8
     - learning rate (Figure 1. left plot)
 
       + ``initial_learning_rate = 0.0``
-      + ``base_learning_rate = 2.0e-3``, linearly increased to 4.0e-3 for 64 workers
+      + ``base_learning_rate = 2.0e-3``
       + decay: We decay by :math:`0.5` after having gone through 40% of total training, and then for every 5% for maximum 4 times
-      + scaling and warmup: We use 20 warmup steps, where the learning rate is exponentially increased from
+      + scaling and warmup: We use 200 warmup steps, where the learning rate is exponentially increased from
         ``initial_learning_rate`` to ``base_learning_rate``
 
     - optimizer: ``Adam(betas=(0.9, 0.999), eps=1e-8, weight_decay=0, amsgrad=False)``
@@ -269,6 +267,14 @@ Implementation details:
 
     Figure 1: Learning rate scheduler for GNMT and Transformer
 
+.. [1] Fitting batch in memory:
+    In order to achieve the mentioned global batch size, one needs to fit a batch size of ``bw = b / world_size`` on each worker.
+    Depending on the used hardware, this cannot be achieved as it takes up too much memory. For that, we compute the gradients on multiple
+    batches of smaller size ``bs`` and aggregate them, before applying the weight update. The frequency at which we update is called ``update_freq``.
+
+    This implies that the global batch size is ``b = bs * world_size * update_freq``. For the used hardware, ``max(bs) = bs_max = 128`` is the maximum value we can fit in memory. Thus, we have
+    ``update_freq = max(1, b / (bs_max * world_size))`` thus ``bs = b / (world_size * update_freq)``
+
 .. _benchmark-task-4b:
 
 4.b Transformer, WMT17 EN-DE
@@ -288,21 +294,19 @@ Implementation details:
     dataset containing a set of translated sentences from multiple languages.
     We exclusively use English-German translation from this dataset.
 
+    The model is trained and tested on sentences of maximum length 80 tokens.
+
 
 #. **Training Algorithm**
     We use Synchronous distributed Adam as the optimizer, which is similar to :cite:`DBLP:journals/corr/0002AMVSKKD16`,
     but uses Adam's update rule:
     Before each weight update, gradients on all workers are summed using an ``all_reduce`` operation and divided by ``world_size * update_frequency``;
     that way, all workers share their gradients and obtain the same weight update.
-    However, since the data is quite large, weight updates don't happen for all batches. Instead, the gradients are aggregated
-    for a certain number of batches. For example, when using 2 workers, we update every 8 batches (for 4 workers, it would be 4 batches).
-    We call this parameter `update frequency`.
 
     Also, this training algorithm uses mixed precision training (explained below).
 
     - number of machines ``k = 1, 2, 4, 8, 16, 32``
-    - max number of tokens per mini-batch ``b = 8192`` (1 to 16 workers), ``4096`` (32 workers), ``2048`` (64 workers)
-    - update frequency ``update_freq = max(16 // num_workers, 1)``
+    - global minibatch size ``b = 2**17`` tokens [2]_.
     - maximum epochs: 10
     - learning rate (Figure 1. right plot)
 
@@ -347,6 +351,11 @@ Implementation details:
 #. **Environments for Scaling Task**
     We use a single process per node environment, with one GPU per process (i.e. one GPU per node).
     The bandwidth between two nodes is around 7.5Gbit/s. ``MPI`` or ``NCCL`` are used for communication.
+
+
+.. [2] Fitting batch in memory:
+    We apply the same technique as in [1]_. For the used hardware, we have ``max(bs) = bs_max = 8192``
+    and ``update_freq = max(1, b / (bs_max * world_size))`` to get ``bs = b / (world_size * update_freq)``
 
 ----
 
@@ -546,6 +555,7 @@ Task 4: Machine Translation
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
     - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
+    - Training on 1 node ~10$
 
 
 .. figure:: images/results/task4a/task4a_speedup.png
@@ -560,9 +570,9 @@ and is only used as an indicator to see the maximum achievable speedup with ligh
 
 A few interesting points:
 
-* Overall speedups follows a :math:`log_2(n)` with ``n = num_workers``, while compute are roughly linear.
-* Scaling the number of compute nodes gives nearly perfect scaling for this task
-* Using more powerful communication hardware (e.g. ``Tesla V100``) will positively affect speedups.
+* Overall speedups seem to follow logarithmic scaling for this configuration.
+* Scaling the number of compute nodes gives perfect linear scaling for this task
+* Using more powerful communication hardware (e.g. ``NVLink®``) will positively affect speedups.
 
 .. figure:: images/results/task4a/task4a_times.png
     :scale: 15
@@ -573,7 +583,7 @@ A few interesting points:
 
 This figure shows the total time spent in each step for all cluster sizes.
 
-* Total time and compute step times decrease in a logarithmic fashion with the increase of number of nodes, which confirms our previous statement.
+* Total time and compute step times follow an exponential decay with the increase of number of nodes.
 * Time spent optimizing doesn't seem to follow the same path, but increases are insignificant (~10 seconds), and are due to additional compute steps (averaging tensors, computations related to Mixed precision) when using distribution
 * Total communication time increases also logarithmically
 
@@ -594,6 +604,7 @@ The right-most graph, shows the worthiness of distribution:
 
 * The price increase is less than the performance increase for 2, 4, and 8 workers. This suggests that distribution is worth the price increase
 * The 4 workers case seems to be the best price-performance trade-off.
+* Training on 4 workers costs ~18$, but is 2.56 times faster.
 
 
 
@@ -617,6 +628,7 @@ The right-most graph, shows the worthiness of distribution:
 #. **Pricing**
     - `n1-standard-4`: $0.2092/hour (regular), $0.0440/hour (preemptible)
     - `NVIDIA® Tesla® T4`: $0.35/hour (regular), $0.11/hour (preemptible)
+    - Training on 1 node ~5.5$
 
 
 .. figure:: images/results/task4b/task4b_speedup.png
@@ -662,7 +674,7 @@ The price index however, has a very different shape:
 * All price indices are below one.
 * This suggests that distributing this particular model on the mentioned hardware is always beneficial despite the price increase.
 * Training Transformer models seems to always benefit from distribution.
-
+* Training on most optimal configuration (8 workers) costs ~9.3$ and is 4.36 times faster.
 
 Benchmark Task Implementations
 ------------------------------

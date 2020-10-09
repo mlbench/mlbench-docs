@@ -79,7 +79,7 @@ If you would like to add GPU acceleration, add the following parameter ``--accel
 
 .. _helm-install:
 
-Helm (Optional)
+Helm (Required)
 ---------------
 
 Helm charts are like recipes to install Kubernetes distributed applications. They consist of templates with some logic that get rendered into Kubernetes deployment `.yaml` files

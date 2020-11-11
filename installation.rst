@@ -13,7 +13,9 @@ Then, the library can be installed directly using ``pip``:
 
 This will install the ``mlbench`` CLI to the current environment, and will allow creation/deletion of clusters, as well as creating runs.
 
-There are other install specifications, which allow to install extra libraries. Here are all the installation possiblities:
+In addition to installation of CLI, we have provided alternative ways of installing `mlbench-core` depending on the use-case.
+These are alternatives and allow installation of extra libraries which are not needed for CLI use.
+Here are all the installation possibilities:
 
 .. code-block:: bash
 
@@ -21,7 +23,7 @@ There are other install specifications, which allow to install extra libraries. 
     $ pip install mlbench-core[lint] # Install with lint requirements
     $ pip install mlbench-core[torch] # Install only with torch requirements
     $ pip install mlbench-core[tensorflow] # Install only with tensorflow requirements
-    $ pip install mlbench-core[dev] # Install all dependencies for development
+    $ pip install mlbench-core[dev] # Install all dependencies for development (all of the above)
 
 .. code-block:: bash
 

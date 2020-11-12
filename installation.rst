@@ -13,6 +13,18 @@ Then, the library can be installed directly using ``pip``:
 
 This will install the ``mlbench`` CLI to the current environment, and will allow creation/deletion of clusters, as well as creating runs.
 
+In addition to installation of CLI, we have provided alternative ways of installing `mlbench-core` depending on the use-case.
+These are alternatives and allow installation of extra libraries which are not needed for CLI use.
+Here are all the installation possibilities:
+
+.. code-block:: bash
+
+    $ pip install mlbench-core[test] # Install with test requirements
+    $ pip install mlbench-core[lint] # Install with lint requirements
+    $ pip install mlbench-core[torch] # Install only with torch requirements
+    $ pip install mlbench-core[tensorflow] # Install only with tensorflow requirements
+    $ pip install mlbench-core[dev] # Install all dependencies for development (all of the above)
+
 .. code-block:: bash
 
    $ mlbench --help
@@ -102,23 +114,15 @@ For example, to obtain the credentials for a GCloud Kubernetes cluster, one shou
 
 This will setup ``kubectl`` for the cluster.
 
-Then to deploy the dashboard on the running cluster, we first need to set up helm with service-account with ``cluster-admin`` rights:
-
-.. code-block:: bash
-
-   $ kubectl --namespace kube-system create sa tiller
-   $ kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-
-Then, we install the chart on the cluster:
+Then to deploy the dashboard on the running cluster, we need to apply our values to the existing helm template, and deploy it onto the cluster
 
 .. code-block:: bash
 
    $ cd mlbench-helm
-   $ helm upgrade --wait --recreate-pods -f values.yaml \
-        --timeout 900s --install ${RELEASE_NAME} . \
+   $ helm template ${RELEASE_NAME} . \
         --set limits.workers=${NUM_NODES-1} \
         --set limits.gpu=${NUM_GPUS} \
-        --set limits.cpu=${NUM_CPUS-1}
+        --set limits.cpu=${NUM_CPUS-1} | kubectl apply -f -
 
 Where :
    - ``RELEASE_NAME`` represents the cluster name (called ``my-cluster-3`` in the example above)

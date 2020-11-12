@@ -202,27 +202,27 @@ Kubernetes-in-Docker allows simulating multiple nodes locally on a single machin
 
 To use KIND, you need to setup a local registry and start a KIND server. We provide the script ``kind-with-registry.sh`` that can be used to start a local registry and a local cluster with one master and two worker nodes. 
 
-In order to push an image to the local registry you need to follow the procedure below. We use the image ``mlbench/pytorch-cifar10-resnet-scaling:2.3.0`` for illustration, but you can use any image of your choice.
+In order to push an image to the local registry you need to follow the procedure below. We use the image ``mlbench/pytorch-cifar10-resnet20-all-reduce:latest`` for illustration, but you can use any image of your choice.
 
 1. Pull (or build) an image on your local machine:
 
 .. code-block:: bash
 
-      $ docker pull mlbench/pytorch-cifar10-resnet-scaling:2.3.0
+      $ docker pull mlbench/pytorch-cifar10-resnet20-all-reduce:latest
    
 2. Tag the image to use the local registry:
 
 .. code-block:: bash
 
-      $ docker tag mlbench/pytorch-cifar10-resnet-scaling:2.3.0 localhost:5000/pytorch-cifar10-resnet-scaling:2.3.0
+      $ docker tag mlbench/pytorch-cifar10-resnet20-all-reduce:latest localhost:5000/pytorch-cifar10-resnet20-all-reduce:latest
       
 3. Push the image to the local registry 
 
 .. code-block:: bash
 
-      $ docker push localhost:5000/pytorch-cifar10-resnet-scaling:2.3.0
+      $ docker push localhost:5000/pytorch-cifar10-resnet20-all-reduce:latest
 
-4. Now you can use the image as a custom image when starting a run on your cluster. Please make sure to specify the new tag of the image (``localhost:5000/pytorch-cifar10-resnet-scaling:2.3.0`` in the running example).
+4. Now you can use the image as a custom image when starting a run on your cluster. Please make sure to specify the new tag of the image (``localhost:5000/pytorch-cifar10-resnet20-all-reduce:latest`` in the running example).
 
 Next, you need to install ``helm`` (See :doc:`prerequisites`) and set the :ref:`helm-charts`.
 

@@ -94,6 +94,32 @@ A few handy commands for quickstart:
  - To download the results of the experiment: ``mlbench download my-run-2``.
  - To delete the cluster: ``mlbench delete-cluster gcloud my-cluster-3``
 
+
+Kubernetes in Docker (KIND)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+MLBench also supports deployment of dashboard and tasks to a local cluster. This uses the KIND technology and can be
+easily deployed using the CLI.
+
+Click `here <https://kind.sigs.k8s.io/docs/user/quick-start/#installation>`_ to download and install KIND.
+
+.. code-block:: bash
+
+    $ mlbench create-cluster kind 3 my-cluster
+    [...]
+    MLBench successfully deployed
+
+This creates a local cluster of 3 "nodes", as well as a local docker registry on port 5000.
+This allows for deploying runs using local docker images.
+To do that, one needs to push their docker image to the local repository:
+
+.. code-block:: bash
+
+    $ docker tag <repo>/<image-name>:<tag> localhost:5000/<image-name>:<tag>
+    $ docker push localhost:5000/<image-name>:<tag>
+
+You can now use the image ``localhost:5000/<image-name>:<tag>`` in MLBench's dashboard to run a task.
+
 .. _helm-charts:
 
 Manual helm chart deployment (Optional)
@@ -193,49 +219,3 @@ In ``values.yaml``, one can optionally install Kubernetes plugins by turning on/
 
 - ``weave.enabled``: If true, install the `weave network plugin <https://github.com/weaveworks/weave>`_.
 - ``nvidiaDevicePlugin.enabled``: If true, install the `nvidia device plugin <https://github.com/NVIDIA/k8s-device-plugin>`_.
-
-
-Kubernetes-in-Docker (KIND)
----------------------------
-
-Kubernetes-in-Docker allows simulating multiple nodes locally on a single machine. This approach should be used only for local development and testing. It is not a recommended way to measure benchmark results. 
-
-To use KIND, you need to setup a local registry and start a KIND server. We provide the script ``kind-with-registry.sh`` that can be used to start a local registry and a local cluster with one master and two worker nodes. 
-
-In order to push an image to the local registry you need to follow the procedure below. We use the image ``mlbench/pytorch-cifar10-resnet20-all-reduce:latest`` for illustration, but you can use any image of your choice.
-
-1. Pull (or build) an image on your local machine:
-
-.. code-block:: bash
-
-      $ docker pull mlbench/pytorch-cifar10-resnet20-all-reduce:latest
-   
-2. Tag the image to use the local registry:
-
-.. code-block:: bash
-
-      $ docker tag mlbench/pytorch-cifar10-resnet20-all-reduce:latest localhost:5000/pytorch-cifar10-resnet20-all-reduce:latest
-      
-3. Push the image to the local registry 
-
-.. code-block:: bash
-
-      $ docker push localhost:5000/pytorch-cifar10-resnet20-all-reduce:latest
-
-4. Now you can use the image as a custom image when starting a run on your cluster. Please make sure to specify the new tag of the image (``localhost:5000/pytorch-cifar10-resnet20-all-reduce:latest`` in the running example).
-
-Next, you need to install ``helm`` (See :doc:`prerequisites`) and set the :ref:`helm-charts`.
-
-Finally, to install mlbench on your local cluster run the following command (you can replace ``rel`` with a release name of your choice)
-
-.. code-block:: bash
-
-   $ helm upgrade --wait --recreate-pods -f values.yaml --timeout 900s --install rel .
-   [...]
-   NOTES:
-   1. Get the application URL by running these commands:
-      export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services rel-mlbench-master)
-      export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-      echo http://$NODE_IP:$NODE_PORT
-
-Run the 3 commands printed by the last command. The third command will output the URL where you can access the MLBench Dashboard. From there, you can start and monitor runs on your local cluster. 

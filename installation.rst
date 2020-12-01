@@ -95,12 +95,11 @@ A few handy commands for quickstart:
  - To delete the cluster: ``mlbench delete-cluster gcloud my-cluster-3``
 
 
-Kubernetes in Docker (KIND)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Kubernetes in Docker (Debugging only)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 MLBench also supports deployment of dashboard and tasks to a local cluster. This uses the KIND technology and can be
-easily deployed using the CLI. This can be used for debugging code or development. It could in theory be used for
-running benchmarks locally (of course with the right hardware), but we do not recommend this use case as it has not been tested.
+easily deployed using the CLI. This can be used for debugging code or development, but is not meant to 
 
 Click `here <https://kind.sigs.k8s.io/docs/user/quick-start/#installation>`_ to download and install KIND.
 

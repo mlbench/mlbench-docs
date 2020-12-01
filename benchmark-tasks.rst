@@ -176,7 +176,7 @@ Task 3: Language Modelling
 
 .. _benchmark-task-3a:
 
-3a. AWD-LSTM, Wikitext2
+3a. LSTM, Wikitext2
 """""""""""""""""""""""
 
 #. **Model**
@@ -575,7 +575,7 @@ Task 2: Linear Learning
 Task 3: Language Modelling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3a. AWD-LSTM, Wikitext2
+3a. LSTM, Wikitext2
 """""""""""""""""""""""
 #. **Frameworks**
     - PyTorch 1.7.0

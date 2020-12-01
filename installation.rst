@@ -99,7 +99,8 @@ Kubernetes in Docker (KIND)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 MLBench also supports deployment of dashboard and tasks to a local cluster. This uses the KIND technology and can be
-easily deployed using the CLI.
+easily deployed using the CLI. This can be used for debugging code or development. It could in theory be used for
+running benchmarks locally (of course with the right hardware), but we do not recommend this use case as it has not been tested.
 
 Click `here <https://kind.sigs.k8s.io/docs/user/quick-start/#installation>`_ to download and install KIND.
 

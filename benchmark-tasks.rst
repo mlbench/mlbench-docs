@@ -176,8 +176,54 @@ Task 3: Language Modelling
 
 .. _benchmark-task-3a:
 
-3a. TODO
-""""""""
+3a. AWD-LSTM, Wikitext2
+"""""""""""""""""""""""
+
+#. **Model**
+    We benchmark the `AWD-LSTM <https://github.com/salesforce/awd-lstm-lm>`_ model.
+
+#. **Dataset**
+    The `Wikitext2 <https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-2-v1.zip>`_ dataset is used.
+    contains text for language modelling. The train set contains 2088628 tokens, and the validation set 217646 tokens.
+    The vocabulary is made of 33278 words
+
+#. **Training Algorithm**
+    We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
+
+    - number of machines ``k = 1, 2, 4, 8, 16, 32``
+    - minibatch size per worker ``b = 80`` sentences
+    - backpropagation through time: ``bptt_len = 70``
+    - Sequence length: Sampled at random for each batch using the following rule ``X ~ Bernouilli(0.95), seq_len = max(min_seq_len, Normal(bptt_len / (1 + X), 5))``
+
+      + Validation sequence length: 10
+
+    - maximum epochs: 750
+    - optimization
+
+      + learning rate per batch :math:`\eta = 30 \times \frac{seq\_len}{bptt\_len}`
+      + weight decay: :math:`1.2e-6`
+      + scaling: We use linear warm-up to scale the learning rate :math:`\eta` to :math:`\eta \times \sqrt{num\_workers}`
+      + warm-up period: We use a warm-up period of :math:`num\_workers * 3` epochs
+      + gradient clipping: Gradient norm is clipped at 0.25
+
+    - scheduling:
+        + If Perplexity stops improving for 5 epochs, optimizer is switched to Averaged SGD
+
+    - loss: ``CrossEntropyLoss``
+        + Activation regularization :math:`\alpha = 2`
+        + Temporal Activation reg. :math:`\beta = 1`
+
+
+**Implementation details:**
+
+#. **Selection of Framework & Systems**
+    We aim to provide the same algorithm in multiple frameworks, primarily focusing on PyTorch and Tensorflow.
+    For the systems, kubernetes allows easy transferability of our code.
+
+#. **Environments for Scaling Task**
+    We use a single process per node environment, with no GPU acceleration.
+    The bandwidth between two nodes is around 7.5Gbit/s. ``MPI``, ``GLOO`` or `NCCL` are used for communication.
+
 
 Task 4: Machine Translation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

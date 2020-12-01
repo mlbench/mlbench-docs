@@ -185,7 +185,7 @@ Task 3: Language Modelling
 #. **Dataset**
     The `Wikitext2 <https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-2-v1.zip>`_ dataset is used.
     contains text for language modelling. The train set contains 2088628 tokens, and the validation set 217646 tokens.
-    The vocabulary is made of 33278 words
+    The vocabulary is made up of 33278 words.
 
 #. **Training Algorithm**
     We use standard synchronous SGD as the optimizer (that is distributed mini-batch SGD with synchronous all-reduce communication before each mini-batch).
@@ -575,8 +575,20 @@ Task 2: Linear Learning
 Task 3: Language Modelling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3a. TODO
-""""""""
+3a. AWD-LSTM, Wikitext2
+"""""""""""""""""""""""
+#. **Frameworks**
+    - PyTorch 1.7.0
+
+#. Communication Backends:
+    - NCCL
+
+#. **System Hardware**
+    - machine type: `n1-standard-4 <https://cloud.google.com/compute/pricing>`_ instances on GCP with 15GB memory and 4 virtual CPUs.
+    - available CPUs: 3 CPUs available for pod (1 for Kubernetes management)
+
+#. **Metric**
+    Time to Perplexity of 70 on validation set
 
 Task 4: Machine Translation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

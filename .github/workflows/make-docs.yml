@@ -1,4 +1,4 @@
-name: Make docs
+name: mlbench-docs
 
 on: [push]
 

@@ -2,17 +2,15 @@
 MLBench: Distributed Machine Learning Benchmark
 ***********************************************
 
-.. image:: https://travis-ci.com/mlbench/mlbench-core.svg?branch=develop
-    :target: https://travis-ci.com/mlbench/mlbench-core
+.. image:: https://github.com/mlbench/mlbench-core/workflows/mlbench-core/badge.svg?branch=develop
 
-.. image:: https://travis-ci.com/mlbench/mlbench-dashboard.svg?branch=develop
-    :target: https://travis-ci.com/mlbench/mlbench-dashboard
+.. image:: https://github.com/mlbench/mlbench-docs/workflows/mlbench-docs/badge.svg?branch=develop
 
-.. image:: https://travis-ci.com/mlbench/mlbench-helm.svg?branch=develop
-    :target: https://travis-ci.com/mlbench/mlbench-helm
+.. image:: https://github.com/mlbench/mlbench-helm/workflows/mlbench-helm/badge.svg?branch=develop
 
-.. image:: https://travis-ci.com/mlbench/mlbench-benchmarks.svg?branch=develop
-    :target: https://travis-ci.com/mlbench/mlbench-benchmarks
+.. image:: https://github.com/mlbench/mlbench-dashboard/workflows/mlbench-dashboard/badge.svg?branch=develop
+
+.. image:: https://github.com/mlbench/mlbench-benchmarks/workflows/mlbench-benchmarks/badge.svg?branch=develop
 
 .. image:: https://readthedocs.org/projects/mlbench/badge/?version=latest
         :target: https://mlbench.readthedocs.io/en/latest/?badge=latest

@@ -193,7 +193,7 @@ Task 3: Language Modelling
     - number of machines ``k = 1, 2, 4, 8, 16, 32``
     - minibatch size per worker ``b = 80`` sentences
     - backpropagation through time: ``bptt_len = 70``
-    - Sequence length: Sampled at random for each batch using the following rule ``X ~ Bernouilli(0.95), seq_len = max(min_seq_len, Normal(bptt_len / (1 + X), 5))``
+    - Sequence length: Sampled at random for each batch using the following rule ``X ~ Bernouilli(0.05), seq_len = max(min_seq_len, Normal(bptt_len / (1 + X), 5))``
 
       + Validation sequence length: 10
 

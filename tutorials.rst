@@ -498,7 +498,7 @@ Using Kubernetes-in-Docker (KIND) for development and debugging
 Developing distributed applications can be a burden because it requires a cluster of machines to be available.
 This induces additional costs that are really not necessary. Luckily, `KIND <https://kind.sigs.k8s.io/>`_ can be very helpful.
 
-KIND allows for deployment of a kubernetes cluster locally, using docker, and unlocks testing and development without an available cluster of machines.
+KIND allows for deployment of a kubernetes cluster locally on your machine, using docker, and unlocks testing and development without an available "real" cluster of machines.
 
 To deploy a KIND cluster locally, use the following command:
 

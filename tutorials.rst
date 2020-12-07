@@ -490,3 +490,67 @@ you also need to delete it by passing the same flag and argument to ``mlbench de
 
     # delete cluster
     $ mlbench delete-cluster gcloud -z europe-west2-b my-cluster-3
+
+
+Using Kubernetes-in-Docker (KIND) for development and debugging
+---------------------------------------------------------------
+
+Developing distributed applications can be a burden because it requires a cluster of machines to be available.
+This induces additional costs that are really not necessary. Luckily, `KIND <https://kind.sigs.k8s.io/>`_ can be very helpful.
+
+KIND allows for deployment of a kubernetes cluster locally on your machine, using docker, and unlocks testing and development without an available "real" cluster of machines.
+
+To deploy a KIND cluster locally, use the following command:
+
+.. code-block:: bash
+
+    $ mlbench create-cluster kind 3 my-cluster
+    [...]
+    MLBench successfully deployed
+
+This will create a "kind" cluster of size 3 nodes, called ``my-cluster``. The dashboard will be available on one running image,
+and the two workers allow you to run some code.
+
+Additionally, this command will also deploy a local docker registry at ``localhost:5000``, which allows the use of local images instead of having to
+pull them for a remote location, and connects the created cluster to it (through docker networks).
+
+.. code-block:: bash
+
+    $ docker ps
+    CONTAINER ID        IMAGE                   COMMAND                  CREATED             STATUS              PORTS                       NAMES
+    54bc6050b3a1        kindest/node:v1.15.12   "/usr/local/bin/entr…"   5 minutes ago       Up 5 minutes                                    my-cluster-3-worker
+    3b5579d64a78        kindest/node:v1.15.12   "/usr/local/bin/entr…"   5 minutes ago       Up 5 minutes        127.0.0.1:40583->6443/tcp   my-cluster-3-control-plane
+    d4612a2c913c        kindest/node:v1.15.12   "/usr/local/bin/entr…"   5 minutes ago       Up 5 minutes                                    my-cluster-3-worker2
+    3624c7f747e3        registry:2              "/entrypoint.sh /etc…"   4 days ago          Up 17 hours         0.0.0.0:5000->5000/tcp      kind-registry
+
+
+To push an image to the local registry (and have it available for the cluster), use the following commands:
+
+.. code-block:: bash
+
+    $ docker tag <repo>/<image>:<tag> localhost:5000/<image>:<tag>
+    $ docker push localhost:5000/<image>:<tag>
+
+At this point, the image ``<image>:<tag>`` will be available for use locally.
+
+.. code-block:: bash
+
+    $ mlbench run test 2
+
+    [0]     PyTorch Cifar-10 ResNet-20
+    [1]     PyTorch Cifar-10 ResNet-20 (DDP)
+    [2]     PyTorch Linear Logistic Regression
+    [3]     PyTorch Language Modeling (AWD-LSTM)
+    [4]     PyTorch Machine Translation GNMT
+    [5]     PyTorch Machine Translation Transformer
+    [6]     Tensorflow Cifar-10 ResNet-20 Open-MPI
+    [7]     PyTorch Distributed Backend benchmarking
+    [8]     Custom Image
+
+    Selection [3]: 8
+    Image:  localhost:5000/<image>:<tag>
+    Command: <command-to-run>
+
+The command to run the image should be a python script with arguments ``run_id, rank, hosts and backend``. For official images, we use the command:
+
+``/conda/bin/python /codes/main.py --run_id {run_id} --rank {rank} --hosts {hosts} --backend {backend}``

@@ -48,6 +48,7 @@ extensions = [
     "sphinxcontrib.bibtex",
 ]
 
+bibtex_bibfiles = ['benchmark-tasks.bib']
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

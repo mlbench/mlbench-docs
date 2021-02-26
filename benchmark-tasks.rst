@@ -240,14 +240,30 @@ Task 3: Language Modelling
 **Implementation details:**
 
 #. **Data Preprocessing**
-    The data needs to be downloaded and pre-processed the pre-processing script
-    `mlbench_core/dataset/nlp/pytorch/wikidump/preprocess/download_dataset.sh <data_dir>` before training.
-    The raw datset is available on our `S3 <https://storage.googleapis.com/mlbench-datasets/wikidump/enwiki-20200101-pages-articles-multistream.xml.bz2>`_,
-    as well as the pre-processed data  here https://storage.googleapis.com/mlbench-datasets/wikidump/processed/part-00XXX-of-00500,
-    where `XXX` goes from `000` to `500`
+    The data needs to be downloaded and pre-processed using the pre-processing script
+    ``mlbench_core/dataset/nlp/pytorch/wikidump/preprocess/download_dataset.sh <data_dir>`` before training.
+    The raw dataset is available on our S3 `here <https://storage.googleapis.com/mlbench-datasets/wikidump/enwiki-20200101-pages-articles-multistream.xml.bz2>`_,
+    as well as the pre-processed data here https://storage.googleapis.com/mlbench-datasets/wikidump/processed/part-00XXX-of-00500,
+    where `XXX` goes from `000` to `500`.
 
-#. **Mixed Precision Training**
-    TODO
+    After pre-processing, the training data needs to be created using the script
+    ``mlbench_core/dataset/nlp/pytorch/wikidump/preprocess/create_pretraining_data.py``.
+    Please run it using the following command (for each of the 500 files)
+
+    .. code-block:: bash
+
+        $ cd mlbench_core/dataset/nlp/pytorch/wikidump/preprocess/
+
+        $ python3 create_pretraining_data.py \
+           --input_file=<path to ./results of previous step>/part-XX-of-00500 \
+           --output_file=<tfrecord dir>/part-XX-of-00500 \
+           --vocab_file=vocab.txt \
+           --do_lower_case=True \
+           --max_seq_length=512 \
+           --max_predictions_per_seq=76 \
+           --masked_lm_prob=0.15 \
+           --random_seed=12345 \
+           --dupe_factor=10
 
 Task 4: Machine Translation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

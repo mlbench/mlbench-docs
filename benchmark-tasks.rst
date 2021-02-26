@@ -95,7 +95,7 @@ Image classification is one of the most important problems in computer vision an
     Besides, in each round workers access disjoint set of datapoints.
 
 
-Implementation details:
+**Implementation details:**
 
 #. **Data Preprocessing**
     We followed the same approach described in :cite:`DBLP:journals/corr/HeZRS15`.
@@ -180,7 +180,7 @@ Task 3: Language Modelling
 """""""""""""""""""""""
 
 #. **Model**
-    We benchmark the `AWD-LSTM <https://github.com/salesforce/awd-lstm-lm>`_ model.
+    We benchmark the ASGD Weight-Dropped LSTM (`AWD-LSTM <https://github.com/salesforce/awd-lstm-lm>`_) model.
 
 #. **Dataset**
     The `Wikitext2 <https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-2-v1.zip>`_ dataset is used.
@@ -224,6 +224,46 @@ Task 3: Language Modelling
     We use a single process per node environment, with no GPU acceleration.
     The bandwidth between two nodes is around 7.5Gbit/s. ``MPI``, ``GLOO`` or `NCCL` are used for communication.
 
+
+.. _benchmark-task-3b:
+
+3a. BERT, Wikidump-20200101
+"""""""""""""""""""""""""""
+#. **Model**
+    TODO
+#. **Dataset**
+    TODO
+
+#. **Training Algorithm**
+    TODO
+
+**Implementation details:**
+
+#. **Data Preprocessing**
+    The data needs to be downloaded and pre-processed using the pre-processing script
+    ``mlbench_core/dataset/nlp/pytorch/wikidump/preprocess/download_dataset.sh <data_dir>`` before training.
+    The raw dataset is available on our S3 `here <https://storage.googleapis.com/mlbench-datasets/wikidump/enwiki-20200101-pages-articles-multistream.xml.bz2>`_,
+    as well as the pre-processed data here https://storage.googleapis.com/mlbench-datasets/wikidump/processed/part-00XXX-of-00500,
+    where `XXX` goes from `000` to `500`.
+
+    After pre-processing, the training data needs to be created using the script
+    ``mlbench_core/dataset/nlp/pytorch/wikidump/preprocess/create_pretraining_data.py``.
+    Please run it using the following command (for each of the 500 files)
+
+    .. code-block:: bash
+
+        $ cd mlbench_core/dataset/nlp/pytorch/wikidump/preprocess/
+
+        $ python3 create_pretraining_data.py \
+           --input_file=<path to ./results of previous step>/part-XX-of-00500 \
+           --output_file=<tfrecord dir>/part-XX-of-00500 \
+           --vocab_file=vocab.txt \
+           --do_lower_case=True \
+           --max_seq_length=512 \
+           --max_predictions_per_seq=76 \
+           --masked_lm_prob=0.15 \
+           --random_seed=12345 \
+           --dupe_factor=10
 
 Task 4: Machine Translation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -278,7 +318,7 @@ Task 4: Machine Translation
       + ``scale_window = 128`` (steps after upscale if no overflow/underflow)
 
 
-Implementation details:
+**Implementation details:**
 
 #. **Data Preprocessing**
     The data needs to be downloaded and pre-processed and tokenized using the pre-processing script
@@ -371,7 +411,7 @@ Implementation details:
       + ``scale_window = 2000`` (steps after upscale if no overflow/underflow)
 
 
-Implementation details:
+**Implementation details**:
 
 #. **Data Preprocessing**
     The data needs to be downloaded and pre-processed and tokenized using the pre-processing script
